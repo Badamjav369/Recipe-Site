@@ -1,0 +1,166 @@
+html {
+    font-size: 16px;
+}
+
+body {
+  font-family: 'Noto Sans';
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #F8F6F0;
+}
+
+/*HEADER SECTION*/
+header, nav, .nevtreh-search {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+header {
+    height: 5rem;
+    width: 100%;
+    font-size: 1.25rem;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: #fff;
+    z-index: 1000;
+    nav {
+        width: 13.75rem;
+    }
+    .nevtreh-search {
+        width: 40.62rem;
+    }
+}
+
+.logo {
+    width: 50px;
+    height: 50px;
+}
+
+input, button {
+    border: none;
+    height: 30px;
+    border-radius: 2rem;
+    font-size: 1rem;
+}
+
+.more-search {
+    background-color: white;
+    border: 3px solid #FF8C42;
+    color: black;
+    width: 12.5rem;
+    font-weight: 100;
+}
+
+button {
+    background-color: #FF8C42;
+    color: white;  
+    width: 120px;
+    font-weight: bold;
+    transition: opacity 0.15s;
+}
+
+button:hover, .search-logo:hover {
+    opacity: 0.8;
+    cursor: pointer;
+}
+
+button:active {
+    opacity: 0.6;
+}
+
+input {
+    width: 13.75rem;
+    padding-left: 1.87rem;
+    color: #535353;
+    background-color: #E7E7E7;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+a:active {
+    color: #FF8C42;
+}
+
+/*MAIN SECTION*/
+main {
+    flex: 1;
+    margin-top: 11rem;
+}
+
+.foods-section {
+    margin: 4rem 7rem 4rem 7rem;
+    padding: 1.81rem 3.56rem;
+    box-sizing: border-box;
+    border-radius: 2rem;
+    background-color: #fff;
+    a, h4 {
+        color: #FF8C42;
+    }
+}
+
+.food-info, .food-title, .cards, .card-hover {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.food-title {
+    height: 3.12rem;
+    h2 {
+        font-size: 1.5rem;
+        font-family: 'pattaya';
+    }
+}
+
+.food-title a:hover {
+    cursor: pointer;
+}
+
+.cards {
+    width: 20rem;
+    height: 16.25rem;
+    border-radius: 1.25rem;
+    flex-direction: column;
+    box-shadow: 0px 4px 3px rgba(0,0,0,0.3);
+    margin-top: 1.81rem;
+    h4 {
+        font-size: 1rem;
+    }
+    h3 {
+        font-size: 1.25rem;
+    }
+    .rate {
+        font-size: 1rem;
+        margin-bottom: 0.3rem;
+    }
+}
+
+.rate, h4, h3, p, button {
+    margin: 0;
+}
+
+.food-image {
+    width: 100%;
+    height: 10.93rem;
+    object-fit: cover;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+}
+
+/*FOOTER SECTION*/
+footer {
+    height: 6rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    border-top: 1px solid black;
+}
