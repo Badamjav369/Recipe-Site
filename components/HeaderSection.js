@@ -8,8 +8,13 @@ export class HeaderSection extends HTMLElement {
     <header>
         <a href="home.html"><img class="logo" src="images/logo.png" alt="logo"></a>
         <nav>
+<<<<<<< HEAD
             <a class="home-nav" href="home.html">Нүүр хуудас</a>
             <a href="recipeы.html">Жорууд</a>
+=======
+            <a class="home-nav" href="index.html">Нүүр хуудас</a>
+            <a href="recipes.html">Жорууд</a>
+>>>>>>> 6fef2f7 (Жижиг өөрчлөлт)
         </nav>
         <section class="nevtreh-search">
             <input type="text" placeholder="Хайх...">
