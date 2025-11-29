@@ -9,7 +9,7 @@ export class HeaderSection extends HTMLElement {
         <a href="home.html"><img class="logo" src="images/logo.png" alt="logo"></a>
         <nav>
             <a class="home-nav" href="home.html">Нүүр хуудас</a>
-            <a href="recipe.html">Жорууд</a>
+            <a href="recipeы.html">Жорууд</a>
         </nav>
         <section class="nevtreh-search">
             <input type="text" placeholder="Хайх...">
