@@ -4,9 +4,7 @@ export class FoodsHover extends HTMLElement {
   }
 
   connectedCallback() {
-    this.innerHTML = `
-      
-    `;
+    this.innerHTML = {}
   }
 }
 customElements.define('foods-hover', FoodsHover);
