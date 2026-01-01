@@ -4,6 +4,7 @@ export class CardSection extends HTMLElement {
   }
 
   connectedCallback() {
+    const ner = this.getAttribute("fname") ?? "-";
     this.innerHTML = `
     <article class="cards">
         <img class="food-image" src="images/food-images/huushuur.jpg" alt="food-images">
@@ -17,7 +18,7 @@ export class CardSection extends HTMLElement {
                 </p>
             </article>
         </section>
-        <h3 class="food-name">Хуушуур</h3>
+        <h3 class="food-name">${ner}</h3>
         <section class="time-member-kalore">
             <section>
                 <img src="images/time.svg" alt="time-icon">

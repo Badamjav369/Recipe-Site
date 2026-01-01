@@ -3,7 +3,9 @@ export class FoodsSection extends HTMLElement {
     super();
   }
 
-  connectedCallback() {
+  async connectedCallback() {
+    const result = await fetch("./info.json");
+    const data= await result.json();
     this.innerHTML = `
       <section class="foods-section">
             <section class="food-title">
@@ -11,10 +13,9 @@ export class FoodsSection extends HTMLElement {
                 <a>Бүгдийг үзэх &#8594;</a>
             </section>
             <section class="food-info">
-                <card-section></card-section>
-                <card-section></card-section>
-                <card-section></card-section>
-                <card-section></card-section>
+            ${
+              data.map(f=>`<card-section fname="${f.name}"></card-section>`).join('')
+            }
             </section>
         </section>
     `;
