@@ -14,5 +14,21 @@
     "time": 10,
     "portion": 4,
     "cal": 200
+  },
+  {
+    "rating": 4.1,
+    "name": "Пизза",
+    "type": "Ази хоол",
+    "time": 5,
+    "portion": 2,
+    "cal": 200
+  },
+  {
+    "rating": 4.1,
+    "name": "Бууз",
+    "type": "Монгол хоол",
+    "time": 10,
+    "portion": 4,
+    "cal": 200
   }
 ]
