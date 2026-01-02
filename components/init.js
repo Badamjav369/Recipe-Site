@@ -1,5 +1,6 @@
-import './HeaderSection.js';
-import './MainSection.js';
-import './FooterSection.js';
-import './FoodsSection.js';
-import './CardSection.js';
+import './index/HeaderSection.js';
+import './index/MainSection.js';
+import './index/FooterSection.js';
+import './index/FoodsSection.js';
+import './index/CardSection.js';
+import './recipes/RecipesMain.js';
