@@ -17,7 +17,7 @@ export class FoodsSection extends HTMLElement {
       <section class="foods-section">
         <section class="food-title">
           <h2>${title}</h2>
-          <a>Бүгдийг үзэх &#8594;</a>
+          <a href="recipes.html">Бүгдийг үзэх &#8594;</a>
         </section>
         <section class="food-info">
           ${

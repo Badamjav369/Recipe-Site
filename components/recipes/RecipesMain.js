@@ -1,61 +1,58 @@
 export class RecipesMain extends HTMLElement {
-  constructor() {
-    super();
-  }
-
   async connectedCallback() {
-    const resCat = await fetch("./data/categories-info.json");
-    const categories = await resCat.json();
-
     this.innerHTML = `
       <main class="main-recipes">
         <section class="category">
           <h2>Ангилалууд</h2>
-          ${categories.map(c => `<a href="#">${c}</a>`).join("")}
         </section>
 
         <section class="selected-cat">
-          <h2 class="type-name">Бүх хоол</h2>
+          <h2>Бүх хоол</h2>
           <section class="all-recipes"></section>
         </section>
       </main>
     `;
 
-    this.loadFoods();
+    const catRes = await fetch("./data/categories-info.json");
+    const categories = await catRes.json();
 
-    this.querySelectorAll(".category a").forEach(link => {
-      link.addEventListener("click", (e) => {
+    const catBox = this.querySelector(".category");
+
+    categories.forEach(cat => {
+      const a = document.createElement("a");
+      a.href = "#";
+      a.textContent = cat;
+      a.onclick = (e) => {
         e.preventDefault();
-        const selected = e.target.textContent;
-        this.querySelector(".selected-cat h2").textContent = selected;
-        this.loadFoods(selected);
-      });
+        this.querySelector(".selected-cat h2").textContent = cat;
+        this.loadFoods(cat);
+      };
+      catBox.appendChild(a);
     });
+
+    this.loadFoods();
   }
 
-  async loadFoods(selectedCategory = "Бүх хоол") {
+  async loadFoods(category = "Бүх хоол") {
     const res = await fetch("./data/info.json");
-    const foods = await res.json();
+    let foods = await res.json();
 
-    let filteredFoods = foods;
-
-    if (selectedCategory !== "Бүх хоол") {
-      filteredFoods = foods.filter(f => f.type === selectedCategory);
+    if (category !== "Бүх хоол") {
+      foods = foods.filter(f => f.type === category);
     }
 
-    this.querySelector(".all-recipes").innerHTML =
-      filteredFoods.map(f => `
-        <card-section
-          name="${f.name}"
-          type="${f.type}"
-          rating="${f.rating}"
-          views="${f.view}"
-          time="${f.time}"
-          portion="${f.portion}"
-          cal="${f.cal}"
-          image="${f.image}">
-        </card-section>
-      `).join("");
+    this.querySelector(".all-recipes").innerHTML = foods.map(f => `
+      <card-section
+        name="${f.name}"
+        type="${f.type}"
+        rating="${f.rating}"
+        views="${f.view}"
+        time="${f.time}"
+        portion="${f.portion}"
+        cal="${f.cal}"
+        image="${f.image}">
+      </card-section>
+    `).join("");
   }
 }
 
