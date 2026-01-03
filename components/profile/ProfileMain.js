@@ -4,8 +4,10 @@ export class ProfileMain extends HTMLElement {
     this.userData = {
       userId: null,
       email: null,
-      username: null
+      username: null,
+      token: null
     };
+    this.API_URL = 'http://localhost:3000/api';
   }
 
   connectedCallback() {
@@ -17,6 +19,7 @@ export class ProfileMain extends HTMLElement {
   loadUserData() {
     this.userData.userId = localStorage.getItem("userId");
     this.userData.email = localStorage.getItem("email");
+    this.userData.token = localStorage.getItem("token");
     this.userData.username = this.extractUsername(this.userData.email);
   }
 
@@ -143,13 +146,12 @@ export class ProfileMain extends HTMLElement {
       cal: form.querySelector("#cal").value.trim(),
       ingredients: form.querySelector("#ingredients").value.trim(),
       instructions: form.querySelector("#instructions").value.trim(),
-      info: form.querySelector("#info").value.trim(),
-      userId: this.userData.userId
+      info: form.querySelector("#info").value.trim()
     };
 
     const imageInput = form.querySelector("#image");
     if (imageInput?.files.length > 0) {
-      formData.image = imageInput.files[0].name;
+      formData.image = `images/food-images/${imageInput.files[0].name}`;
     }
 
     return formData;
@@ -169,17 +171,37 @@ export class ProfileMain extends HTMLElement {
   }
 
   async submitRecipe(data) {
-    console.log("Жор нэмэх:", data);
-    
-    // TODO: Backend API дуудлага
-    // const response = await fetch('/api/recipes/add', {
-    // method: 'POST',
-    // headers: { 'Content-Type': 'application/json' },
-    // body: JSON.stringify(data)
-    // });
-    
-    this.showSuccess("Жор амжилттай нэмэгдлээ! (Одоогоор backend байхгүй)");
-    return true;
+    try {
+      // Token шалгах
+      if (!this.userData.token) {
+        this.showError('Нэвтрэх шаардлагатай');
+        return false;
+      }
+
+      // API руу хүсэлт илгээх
+      const response = await fetch(`${this.API_URL}/recipes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.userData.token}`
+        },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Алдаа гарлаа');
+      }
+
+      this.showSuccess(`Жор амжилттай нэмэгдлээ! (ID: ${result.recipeId})`);
+      return true;
+
+    } catch (error) {
+      console.error('Жор нэмэхэд алдаа:', error);
+      this.showError(error.message || 'Жор нэмэхэд алдаа гарлаа');
+      return false;
+    }
   }
 
   async handleFormSubmit(e) {
@@ -192,8 +214,18 @@ export class ProfileMain extends HTMLElement {
       return;
     }
 
+    // Loading харуулах
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Нэмж байна...';
+    submitBtn.disabled = true;
+
     const success = await this.submitRecipe(formData);
     
+    // Loading арилгах
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+
     if (success) {
       form.reset();
     }
@@ -210,6 +242,7 @@ export class ProfileMain extends HTMLElement {
   clearUserData() {
     localStorage.removeItem("userId");
     localStorage.removeItem("email");
+    localStorage.removeItem("token");
   }
 
   attachEventListeners() {

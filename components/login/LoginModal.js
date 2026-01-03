@@ -11,13 +11,11 @@ export class LoginModal extends HTMLElement {
     this.attachEventListeners();
   }
 
-  // Elements-үүдийг cache хийх
   cacheElements() {
     this.overlay = this.querySelector(".login-overlay");
     this.form = this.querySelector(".login-form");
   }
 
-  // Modal HTML үүсгэх
   createModalHTML() {
     return `
       <div class="login-overlay">
@@ -30,12 +28,10 @@ export class LoginModal extends HTMLElement {
     `;
   }
 
-  // Header HTML
   createHeaderHTML() {
     return `<h2>Илүү их үйлдэл хийхийн тулд та нэвтрэх эсвэл бүртгүүлээрэй</h2>`;
   }
 
-  // Input талбарууд HTML
   createInputsHTML() {
     return `
       <input type="email" class="email-input" placeholder="Gmail-ээ оруулна уу" required>

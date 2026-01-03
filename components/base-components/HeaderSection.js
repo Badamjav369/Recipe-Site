@@ -169,7 +169,6 @@ export class HeaderSection extends HTMLElement {
     );
   }
 
-  // Food card HTML үүсгэх
   createFoodCard(food) {
     return `
       <card-section
@@ -186,7 +185,6 @@ export class HeaderSection extends HTMLElement {
     `;
   }
 
-  // Хайлтын үр дүн харуулах
   renderSearchResults(filteredFoods, query) {
     const container = this.elements.recipes?.querySelector(".all-recipes");
     if (!container) return;
