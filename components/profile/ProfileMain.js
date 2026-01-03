@@ -7,7 +7,7 @@ export class ProfileMain extends HTMLElement {
       username: null,
       token: null
     };
-    this.API_URL = 'http://localhost:3000/api';
+    this.API_BASE_URL = 'http://localhost:3000/api';
   }
 
   connectedCallback() {
@@ -121,11 +121,11 @@ export class ProfileMain extends HTMLElement {
   createTextAreasHTML() {
     return `
       <label for="ingredients">Орц</label><br>
-      <textarea id="ingredients" name="ingredients" placeholder="Орцоо оруулна уу..." required></textarea><br>
+      <textarea id="ingredients" name="ingredients" placeholder="Орцоо оруулна уу (мөр бүрт нэг орц)..." required></textarea><br>
       <label for="instructions">Хийх дараалал</label><br>
-      <textarea id="instructions" name="instructions" placeholder="Хийх дарааллыг оруулна уу..." required></textarea><br>
+      <textarea id="instructions" name="instructions" placeholder="Хийх дарааллыг оруулна уу (мөр бүрт нэг алхам)..." required></textarea><br>
       <label for="info">Нэмэлт мэдээлэл, зөвлөмж</label><br>
-      <textarea id="info" name="info" placeholder="Нэмэлт зөвлөмж, санамж..."></textarea><br>
+      <textarea id="info" name="info" placeholder="Нэмэлт зөвлөмж, санамж (мөр бүрт нэг)..."></textarea><br>
     `;
   }
 
@@ -141,24 +141,50 @@ export class ProfileMain extends HTMLElement {
     const formData = {
       name: form.querySelector("#name").value.trim(),
       type: form.querySelector("#type").value.trim(),
-      time: form.querySelector("#time").value.trim(),
+      time: parseInt(form.querySelector("#time").value.trim()),
       portion: form.querySelector("#portion").value.trim(),
-      cal: form.querySelector("#cal").value.trim(),
-      ingredients: form.querySelector("#ingredients").value.trim(),
-      instructions: form.querySelector("#instructions").value.trim(),
-      info: form.querySelector("#info").value.trim()
+      calories: parseInt(form.querySelector("#cal").value.trim()),
+      image_url: '',
+      ingredients: [],
+      steps: [],
+      extras: []
     };
 
+    // Handle image
     const imageInput = form.querySelector("#image");
     if (imageInput?.files.length > 0) {
-      formData.image = `images/food-images/${imageInput.files[0].name}`;
+      formData.image_url = `images/${imageInput.files[0].name}`;
+    }
+
+    // Parse ingredients (split by newline)
+    const ingredientsText = form.querySelector("#ingredients").value.trim();
+    if (ingredientsText) {
+      formData.ingredients = ingredientsText.split('\n')
+        .map(i => i.trim())
+        .filter(i => i.length > 0);
+    }
+
+    // Parse instructions/steps (split by newline)
+    const instructionsText = form.querySelector("#instructions").value.trim();
+    if (instructionsText) {
+      formData.steps = instructionsText.split('\n')
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+    }
+
+    // Parse extra info (split by newline)
+    const infoText = form.querySelector("#info").value.trim();
+    if (infoText) {
+      formData.extras = infoText.split('\n')
+        .map(e => e.trim())
+        .filter(e => e.length > 0);
     }
 
     return formData;
   }
 
   validateRecipeForm(data) {
-    const requiredFields = ['name', 'type', 'time', 'portion', 'cal', 'ingredients', 'instructions'];
+    const requiredFields = ['name', 'type', 'time', 'portion', 'calories'];
     
     for (const field of requiredFields) {
       if (!data[field]) {
@@ -166,20 +192,25 @@ export class ProfileMain extends HTMLElement {
         return false;
       }
     }
+
+    if (data.ingredients.length === 0) {
+      this.showError('Орц оруулна уу');
+      return false;
+    }
+
+    if (data.steps.length === 0) {
+      this.showError('Хийх дарааллыг оруулна уу');
+      return false;
+    }
     
     return true;
   }
 
   async submitRecipe(data) {
     try {
-      // Token шалгах
-      if (!this.userData.token) {
-        this.showError('Нэвтрэх шаардлагатай');
-        return false;
-      }
+      console.log("Sending recipe data:", data);
 
-      // API руу хүсэлт илгээх
-      const response = await fetch(`${this.API_URL}/recipes`, {
+      const response = await fetch(`${this.API_BASE_URL}/recipes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -191,21 +222,28 @@ export class ProfileMain extends HTMLElement {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Алдаа гарлаа');
+        throw new Error(result.error || 'Жор нэмэхэд алдаа гарлаа');
       }
 
-      this.showSuccess(`Жор амжилттай нэмэгдлээ! (ID: ${result.recipeId})`);
+      console.log("Recipe created:", result);
+      this.showSuccess("Жор амжилттай нэмэгдлээ!");
       return true;
 
     } catch (error) {
-      console.error('Жор нэмэхэд алдаа:', error);
-      this.showError(error.message || 'Жор нэмэхэд алдаа гарлаа');
+      console.error('Submit recipe error:', error);
+      this.showError(error.message || 'Серверт холбогдох явцад алдаа гарлаа');
       return false;
     }
   }
 
   async handleFormSubmit(e) {
     e.preventDefault();
+
+    // Check if user is logged in
+    if (!this.userData.token) {
+      this.showError('Та нэгж нэвтэрнэ үү');
+      return;
+    }
 
     const form = e.target;
     const formData = this.collectFormData(form);
@@ -214,20 +252,12 @@ export class ProfileMain extends HTMLElement {
       return;
     }
 
-    // Loading харуулах
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Нэмж байна...';
-    submitBtn.disabled = true;
-
     const success = await this.submitRecipe(formData);
     
-    // Loading арилгах
-    submitBtn.textContent = originalText;
-    submitBtn.disabled = false;
-
     if (success) {
       form.reset();
+      // Optionally reload user's recipes section
+      // this.loadUserRecipes();
     }
   }
 
@@ -284,6 +314,19 @@ export class ProfileMain extends HTMLElement {
 
   render() {
     this.innerHTML = this.createProfileHTML();
+  }
+
+  // Optional: Method to fetch and display user's recipes
+  async loadUserRecipes() {
+    try {
+      const response = await fetch(`${this.API_BASE_URL}/recipes/user/${this.userData.userId}`);
+      const recipes = await response.json();
+      console.log('User recipes:', recipes);
+      // Update the UI with recipes
+      return recipes;
+    } catch (error) {
+      console.error('Load recipes error:', error);
+    }
   }
 }
 
