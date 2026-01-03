@@ -11,7 +11,6 @@ export class RecipesInfo extends HTMLElement {
     this.innerHTML = `<main class="recipes"></main>`;
   }
 
-  // Өгөгдөл ачаалах
   async loadRecipeData(id) {
     try {
       const [infoRes, detailsRes] = await Promise.all([
@@ -34,12 +33,10 @@ export class RecipesInfo extends HTMLElement {
     }
   }
 
-  // Жор олох
   findRecipe(data, id) {
     return data.find(r => r.id === id);
   }
 
-  // Ойролцоо хоол олох
   findSimilarFoods(allFoods, currentRecipe) {
     return allFoods
       .filter(f => f.type === currentRecipe.type && f.id !== currentRecipe.id)
@@ -47,7 +44,6 @@ export class RecipesInfo extends HTMLElement {
       .slice(0, 4);
   }
 
-  // View утга parse хийх
   parseView(view) {
     if (typeof view === "string") {
       const cleaned = view.toLowerCase().trim();
@@ -58,7 +54,6 @@ export class RecipesInfo extends HTMLElement {
     return Number(view) || 0;
   }
 
-  // Ingredients HTML үүсгэх
   createIngredientsHTML(ingredients) {
     if (!ingredients || ingredients.length === 0) {
       return "<li>Орц мэдээлэл байхгүй</li>";
@@ -66,7 +61,6 @@ export class RecipesInfo extends HTMLElement {
     return ingredients.map(i => `<li>${i}</li>`).join("");
   }
 
-  // Steps HTML үүсгэх
   createStepsHTML(steps) {
     if (!steps || steps.length === 0) {
       return "<li>Хийх дараалал мэдээлэл байхгүй</li>";
@@ -74,7 +68,6 @@ export class RecipesInfo extends HTMLElement {
     return steps.map(s => `<li>${s}</li>`).join("");
   }
 
-  // Extra info HTML үүсгэх
   createExtraHTML(extra) {
     if (!extra || extra.length === 0) {
       return "<p>Нэмэлт мэдээлэл байхгүй</p>";
@@ -82,14 +75,12 @@ export class RecipesInfo extends HTMLElement {
     return extra.map(e => `<p>${e}</p>`).join("");
   }
 
-  // Recipe зураг HTML
   createImageHTML(recipe) {
     return `
       <img class="food-images" src="${recipe.image}" alt="${recipe.name}">
     `;
   }
 
-  // Ingredients секшн HTML
   createIngredientsSection(ingredients) {
     return `
       <article class="ingredients">
@@ -99,7 +90,6 @@ export class RecipesInfo extends HTMLElement {
     `;
   }
 
-  // Recipe detail HTML
   createRecipeDetailHTML(recipe, extra, username) {
     return `
       <section class="recipe-detail">
@@ -114,7 +104,6 @@ export class RecipesInfo extends HTMLElement {
     `;
   }
 
-  // Steps секшн HTML
   createStepsSection(steps) {
     return `
       <article class="steps">
@@ -124,7 +113,6 @@ export class RecipesInfo extends HTMLElement {
     `;
   }
 
-  // Similar foods card HTML
   createSimilarFoodCard(food) {
     return `
       <card-section
@@ -141,7 +129,6 @@ export class RecipesInfo extends HTMLElement {
     `;
   }
 
-  // Similar foods секшн HTML
   createSimilarFoodsHTML(similarFoods) {
     if (similarFoods.length === 0) {
       return "<p>Ойролцоо хоол олдсонгүй</p>";
@@ -149,7 +136,6 @@ export class RecipesInfo extends HTMLElement {
     return similarFoods.map(f => this.createSimilarFoodCard(f)).join("");
   }
 
-  // Бүтэн recipe HTML
   createRecipeHTML(recipe, details, similarFoods) {
     const ingredientsHTML = this.createIngredientsHTML(details?.ingredients);
     const stepsHTML = this.createStepsHTML(details?.steps);
@@ -182,7 +168,6 @@ export class RecipesInfo extends HTMLElement {
     `;
   }
 
-  // Recipe олдоогүй HTML
   createNotFoundHTML() {
     return `
       <main class="recipes">
@@ -191,7 +176,6 @@ export class RecipesInfo extends HTMLElement {
     `;
   }
 
-  // Error HTML
   createErrorHTML() {
     return `
       <main class="recipes">
@@ -202,7 +186,6 @@ export class RecipesInfo extends HTMLElement {
     `;
   }
 
-  // Хадгалах товч handler
   handleSaveButton() {
     const userId = localStorage.getItem("userId");
     
@@ -211,12 +194,10 @@ export class RecipesInfo extends HTMLElement {
       return;
     }
 
-    // TODO: Backend API дуудлага
     console.log("Жор хадгалах:", this.recipeId);
     alert("Жор амжилттай хадгалагдлаа! (Одоогоор backend байхгүй)");
   }
 
-  // Үнэлгээ өгөх товч handler
   handleRateButton() {
     const userId = localStorage.getItem("userId");
     
@@ -228,7 +209,6 @@ export class RecipesInfo extends HTMLElement {
     const rating = prompt("1-5 хүртэлх үнэлгээ оруулна уу:");
     
     if (rating && rating >= 1 && rating <= 5) {
-      // TODO: Backend API дуудлага
       console.log("Үнэлгээ өгөх:", { recipeId: this.recipeId, rating });
       alert(`Таны үнэлгээ: ${rating} ⭐ (Одоогоор backend байхгүй)`);
     } else if (rating) {
@@ -236,7 +216,6 @@ export class RecipesInfo extends HTMLElement {
     }
   }
 
-  // Товчны event listeners
   attachButtonListeners() {
     const saveBtn = this.querySelector(".save");
     const rateBtn = this.querySelector(".rate");
@@ -250,15 +229,12 @@ export class RecipesInfo extends HTMLElement {
     }
   }
 
-  // Жор харуулах (үндсэн функц)
   async showRecipe(id) {
     try {
       this.recipeId = id;
 
-      // Өгөгдөл ачаалах
       const { infoData, detailsData } = await this.loadRecipeData(id);
 
-      // Жор олох
       this.recipe = this.findRecipe(infoData, id);
       
       if (!this.recipe) {
@@ -266,16 +242,12 @@ export class RecipesInfo extends HTMLElement {
         return;
       }
 
-      // Details олох
       this.details = this.findRecipe(detailsData, id);
 
-      // Ойролцоо хоол олох
       this.similarFoods = this.findSimilarFoods(infoData, this.recipe);
 
-      // Render хийх
       this.innerHTML = this.createRecipeHTML(this.recipe, this.details, this.similarFoods);
 
-      // Event listeners нэмэх
       this.attachButtonListeners();
 
     } catch (error) {

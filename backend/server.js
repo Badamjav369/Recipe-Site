@@ -9,12 +9,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK' });
 });
 
-// Login
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   const users = await db.query('SELECT * FROM users WHERE email = ?', [email]);
@@ -25,13 +23,11 @@ app.post('/api/login', async (req, res) => {
   res.json({ token, userId: users[0].user_id, email: users[0].email });
 });
 
-// Recipes
 app.get('/api/recipes', async (req, res) => {
   const recipes = await db.query('SELECT * FROM recipes');
   res.json(recipes);
 });
 
-// Start
 app.listen(3000, async () => {
   try {
     await db.pool.getConnection();

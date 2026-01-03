@@ -43,7 +43,6 @@ export class LoginModal extends HTMLElement {
     `;
   }
 
-  // Товчнууд HTML
   createButtonsHTML() {
     return `
       <button type="submit">Нэвтрэх</button>
@@ -57,7 +56,6 @@ export class LoginModal extends HTMLElement {
     `;
   }
 
-  // Form өгөгдөл авах
   getFormData() {
     const emailInput = this.form.querySelector('.email-input');
     const passwordInput = this.form.querySelector('.password-input');
@@ -68,7 +66,6 @@ export class LoginModal extends HTMLElement {
     };
   }
 
-  // Өгөгдөл validate хийх
   validateFormData(data) {
     if (!data.email || !data.password) {
       this.showError("Gmail болон нууц үгээ оруулна уу");
@@ -83,12 +80,10 @@ export class LoginModal extends HTMLElement {
     return true;
   }
 
-  // Email format шалгах
   isValidEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
-  // Хэрэглэгчийн өгөгдөл татах
   async fetchUsers() {
     const res = await fetch("./data/security.json");
     
@@ -99,18 +94,15 @@ export class LoginModal extends HTMLElement {
     return await res.json();
   }
 
-  // Хэрэглэгч олох
   findUser(users, email, password) {
     return users.find(u => u.email === email && u.password === password);
   }
 
-  // Хэрэглэгчийн мэдээлэл хадгалах
   saveUserData(user) {
     localStorage.setItem("userId", user.userId);
     localStorage.setItem("email", user.email);
   }
 
-  // Нэвтрэх үйлдэл
   async performLogin(data) {
     try {
       const users = await this.fetchUsers();
@@ -132,7 +124,6 @@ export class LoginModal extends HTMLElement {
     }
   }
 
-  // Form submit handler
   async handleSubmit(e) {
     e.preventDefault();
 
@@ -150,14 +141,12 @@ export class LoginModal extends HTMLElement {
     }
   }
 
-  // Overlay дарахад хаах
   handleOverlayClick(e) {
     if (e.target === this.overlay) {
       this.close();
     }
   }
 
-  // Event listeners нэмэх
   attachEventListeners() {
     if (this.overlay) {
       this.overlay.addEventListener("click", (e) => this.handleOverlayClick(e));
@@ -168,7 +157,6 @@ export class LoginModal extends HTMLElement {
     }
   }
 
-  // Modal нээх
   open() {
     if (this.overlay) {
       this.overlay.style.display = "flex";
@@ -176,7 +164,6 @@ export class LoginModal extends HTMLElement {
     }
   }
 
-  // Modal хаах
   close() {
     if (this.overlay) {
       this.overlay.style.display = "none";
@@ -185,29 +172,24 @@ export class LoginModal extends HTMLElement {
     this.resetForm();
   }
 
-  // Form цэвэрлэх
   resetForm() {
     if (this.form) {
       this.form.reset();
     }
   }
 
-  // Хуудас шинэчлэх
   reloadPage() {
     window.location.reload();
   }
 
-  // Error харуулах
   showError(message) {
     alert(message);
   }
 
-  // Success харуулах
   showSuccess(message) {
     alert(message);
   }
 
-  // Render
   render() {
     this.innerHTML = this.createModalHTML();
   }

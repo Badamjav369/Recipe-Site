@@ -11,7 +11,6 @@ export class RecipesMain extends HTMLElement {
     await this.loadFoods();
   }
 
-  // HTML бүтэц үүсгэх
   createHTML() {
     return `
       <main class="main-recipes">
@@ -21,7 +20,6 @@ export class RecipesMain extends HTMLElement {
     `;
   }
 
-  // Category хэсэг HTML
   createCategorySection() {
     return `
       <section class="category">
@@ -30,7 +28,6 @@ export class RecipesMain extends HTMLElement {
     `;
   }
 
-  // Recipes хэсэг HTML
   createRecipesSection() {
     return `
       <section class="selected-cat">
@@ -40,7 +37,6 @@ export class RecipesMain extends HTMLElement {
     `;
   }
 
-  // Categories JSON татах
   async fetchCategories() {
     const response = await fetch("./data/categories-info.json");
     
@@ -51,7 +47,6 @@ export class RecipesMain extends HTMLElement {
     return await response.json();
   }
 
-  // Foods JSON татах
   async fetchFoods() {
     const response = await fetch("./data/info.json");
     
@@ -62,7 +57,6 @@ export class RecipesMain extends HTMLElement {
     return await response.json();
   }
 
-  // Category link үүсгэх
   createCategoryLink(category) {
     const link = document.createElement("a");
     link.href = "#";
@@ -71,7 +65,6 @@ export class RecipesMain extends HTMLElement {
     return link;
   }
 
-  // Category дарахад
   handleCategoryClick(e, category) {
     e.preventDefault();
     this.currentCategory = category;
@@ -79,7 +72,6 @@ export class RecipesMain extends HTMLElement {
     this.loadFoods(category);
   }
 
-  // Category title шинэчлэх
   updateCategoryTitle() {
     const titleElement = this.querySelector(".selected-cat h2");
     if (titleElement) {
@@ -87,7 +79,6 @@ export class RecipesMain extends HTMLElement {
     }
   }
 
-  // Category links харуулах
   renderCategoryLinks() {
     const categoryBox = this.querySelector(".category");
     
@@ -99,7 +90,6 @@ export class RecipesMain extends HTMLElement {
     });
   }
 
-  // Category error харуулах
   showCategoryError() {
     const categoryBox = this.querySelector(".category");
     if (categoryBox) {
@@ -111,7 +101,6 @@ export class RecipesMain extends HTMLElement {
     }
   }
 
-  // Categories ачаалах
   async loadCategories() {
     try {
       this.categories = await this.fetchCategories();
@@ -122,7 +111,6 @@ export class RecipesMain extends HTMLElement {
     }
   }
 
-  // Foods шүүх
   filterFoods(foods, category) {
     if (category === "Бүх хоол") {
       return foods;
@@ -130,7 +118,6 @@ export class RecipesMain extends HTMLElement {
     return foods.filter(f => f.type === category);
   }
 
-  // Food card HTML үүсгэх
   createFoodCard(food) {
     return `
       <card-section
@@ -147,7 +134,6 @@ export class RecipesMain extends HTMLElement {
     `;
   }
 
-  // Хоол олдоогүй HTML
   createEmptyStateHTML(category) {
     return `
       <p style="text-align: center; width: 100%; padding: 2rem; color: #777;">
@@ -156,7 +142,6 @@ export class RecipesMain extends HTMLElement {
     `;
   }
 
-  // Error HTML
   createErrorHTML() {
     return `
       <p style="text-align: center; width: 100%; padding: 2rem; color: #777;">
@@ -165,7 +150,6 @@ export class RecipesMain extends HTMLElement {
     `;
   }
 
-  // Food cards харуулах
   renderFoodCards(foods) {
     const container = this.querySelector(".all-recipes");
     
@@ -182,7 +166,6 @@ export class RecipesMain extends HTMLElement {
     container.innerHTML = foods.map(f => this.createFoodCard(f)).join("");
   }
 
-  // Error харуулах
   showFoodsError() {
     const container = this.querySelector(".all-recipes");
     if (container) {
@@ -190,7 +173,6 @@ export class RecipesMain extends HTMLElement {
     }
   }
 
-  // Foods ачаалах
   async loadFoods(category = "Бүх хоол") {
     try {
       this.currentCategory = category;
@@ -206,7 +188,6 @@ export class RecipesMain extends HTMLElement {
     }
   }
 
-  // Render
   render() {
     this.innerHTML = this.createHTML();
   }

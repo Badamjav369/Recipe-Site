@@ -14,21 +14,18 @@ export class ProfileMain extends HTMLElement {
     this.attachEventListeners();
   }
 
-  // localStorage-оос мэдээлэл авах
   loadUserData() {
     this.userData.userId = localStorage.getItem("userId");
     this.userData.email = localStorage.getItem("email");
     this.userData.username = this.extractUsername(this.userData.email);
   }
 
-  // Email-ээс нэр гаргах
   extractUsername(email) {
     if (!email) return "Хэрэглэгч";
     const username = email.split("@")[0];
     return username.charAt(0).toUpperCase() + username.slice(1);
   }
 
-  // Profile HTML үүсгэх
   createProfileHTML() {
     return `
       <main>
@@ -42,7 +39,6 @@ export class ProfileMain extends HTMLElement {
     `;
   }
 
-  // Sidebar HTML
   createSidebarHTML() {
     return `
       <aside>
@@ -52,7 +48,6 @@ export class ProfileMain extends HTMLElement {
     `;
   }
 
-  // Profile зураг болон гарчиг
   createProfileHeaderHTML() {
     return `
       <section class="profile-image-title">
@@ -62,7 +57,6 @@ export class ProfileMain extends HTMLElement {
     `;
   }
 
-  // Хэрэглэгчийн мэдээлэл
   createUserInfoHTML() {
     return `
       <section class="user-info">
@@ -75,7 +69,6 @@ export class ProfileMain extends HTMLElement {
     `;
   }
 
-  // Form хэсэг HTML
   createFormSectionHTML() {
     return `
       <section class="right-side">
@@ -91,7 +84,6 @@ export class ProfileMain extends HTMLElement {
     `;
   }
 
-  // Үндсэн input талбарууд
   createBasicInputsHTML() {
     return `
       <section class="name-type">
@@ -103,7 +95,6 @@ export class ProfileMain extends HTMLElement {
     `;
   }
 
-  // Зураг оруулах
   createImageInputHTML() {
     return `
       <label class="upload-box" for="image">Зураг оруулах</label><br>
@@ -111,7 +102,6 @@ export class ProfileMain extends HTMLElement {
     `;
   }
 
-  // Дэлгэрэнгүй мэдээлэл
   createDetailInputsHTML() {
     return `
       <section class="detail-info-recipe">
@@ -125,7 +115,6 @@ export class ProfileMain extends HTMLElement {
     `;
   }
 
-  // Textarea талбарууд
   createTextAreasHTML() {
     return `
       <label for="ingredients">Орц</label><br>
@@ -137,17 +126,14 @@ export class ProfileMain extends HTMLElement {
     `;
   }
 
-  // Хадгалсан жорууд
   createSavedRecipesHTML() {
     return `<foods-section title="Хадгалсан жорууд"></foods-section>`;
   }
 
-  // Оруулсан жорууд
   createUserRecipesHTML() {
     return `<foods-section title="Оруулсан жорууд"></foods-section>`;
   }
 
-  // Form өгөгдөл цуглуулах
   collectFormData(form) {
     const formData = {
       name: form.querySelector("#name").value.trim(),
@@ -169,7 +155,6 @@ export class ProfileMain extends HTMLElement {
     return formData;
   }
 
-  // Form validate
   validateRecipeForm(data) {
     const requiredFields = ['name', 'type', 'time', 'portion', 'cal', 'ingredients', 'instructions'];
     
@@ -183,22 +168,20 @@ export class ProfileMain extends HTMLElement {
     return true;
   }
 
-  // Жор нэмэх
   async submitRecipe(data) {
     console.log("Жор нэмэх:", data);
     
     // TODO: Backend API дуудлага
     // const response = await fetch('/api/recipes/add', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(data)
+    // method: 'POST',
+    // headers: { 'Content-Type': 'application/json' },
+    // body: JSON.stringify(data)
     // });
     
     this.showSuccess("Жор амжилттай нэмэгдлээ! (Одоогоор backend байхгүй)");
     return true;
   }
 
-  // Form submit handler
   async handleFormSubmit(e) {
     e.preventDefault();
 
@@ -216,7 +199,6 @@ export class ProfileMain extends HTMLElement {
     }
   }
 
-  // Logout хийх
   handleLogout() {
     if (confirm("Та системээс гарахдаа итгэлтэй байна уу?")) {
       this.clearUserData();
@@ -225,13 +207,11 @@ export class ProfileMain extends HTMLElement {
     }
   }
 
-  // User data устгах
   clearUserData() {
     localStorage.removeItem("userId");
     localStorage.removeItem("email");
   }
 
-  // Event listeners холбох
   attachEventListeners() {
     const form = this.querySelector(".add-recipe-form");
     if (form) {
@@ -244,7 +224,6 @@ export class ProfileMain extends HTMLElement {
     }
   }
 
-  // Хэрэглэгчийн мэдээлэл шинэчлэх
   updateUserDisplay() {
     const nameDisplay = this.querySelector(".user-name-display");
     const emailDisplay = this.querySelector(".user-email-display");
@@ -253,13 +232,11 @@ export class ProfileMain extends HTMLElement {
     if (emailDisplay) emailDisplay.textContent = this.userData.email || 'example@gmail.com';
   }
 
-  // Profile харуулах (HeaderSection-ээс дуудагдана)
   showProfile() {
     this.loadUserData();
     this.updateUserDisplay();
   }
 
-  // Мэдэгдэл харуулах
   showError(message) {
     alert(message);
   }
@@ -268,12 +245,10 @@ export class ProfileMain extends HTMLElement {
     alert(message);
   }
 
-  // Хуудас reload
   reloadPage() {
     window.location.reload();
   }
 
-  // Render
   render() {
     this.innerHTML = this.createProfileHTML();
   }

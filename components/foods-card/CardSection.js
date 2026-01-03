@@ -10,7 +10,6 @@ export class CardSection extends HTMLElement {
     this.attachEventListeners();
   }
 
-  // Attributes-аас өгөгдөл авах
   initializeData() {
     this.cardData = {
       id: this.getAttribute("id"),
@@ -25,19 +24,16 @@ export class CardSection extends HTMLElement {
     };
   }
 
-  // Rating форматлах
   formatRating(rating) {
     return Number(rating ?? 0).toFixed(1);
   }
 
-  // Card header HTML
   createHeaderHTML() {
     return `
       <img class="food-image" src="${this.cardData.image}" alt="${this.cardData.name}">
     `;
   }
 
-  // Type болон rating HTML
   createTypeRatingHTML() {
     return `
       <section class="type-rate">
@@ -53,12 +49,10 @@ export class CardSection extends HTMLElement {
     `;
   }
 
-  // Хоолны нэр HTML
   createNameHTML() {
     return `<h3 class="food-name">${this.cardData.name}</h3>`;
   }
 
-  // Хугацаа, порц, калори HTML
   createDetailsHTML() {
     return `
       <section class="time-member-kalore">
@@ -69,7 +63,6 @@ export class CardSection extends HTMLElement {
     `;
   }
 
-  // Detail item үүсгэх
   createDetailItem(icon, alt, text) {
     return `
       <section>
@@ -79,7 +72,6 @@ export class CardSection extends HTMLElement {
     `;
   }
 
-  // Бүрэн HTML
   createCardHTML() {
     return `
       <article class="cards">
@@ -91,7 +83,6 @@ export class CardSection extends HTMLElement {
     `;
   }
 
-  // DOM элементүүд авах
   getElements() {
     return {
       recipeInfo: document.getElementById('recipe'),
@@ -101,14 +92,12 @@ export class CardSection extends HTMLElement {
     };
   }
 
-  // Бүх секшн хаах
   hideAllSections(elements) {
     if (elements.home) elements.home.style.display = 'none';
     if (elements.recipes) elements.recipes.style.display = 'none';
     if (elements.profileSection) elements.profileSection.style.display = 'none';
   }
 
-  // Recipe харуулах
   showRecipe(recipeInfo) {
     const recipeId = Number(this.cardData.id);
     
@@ -119,7 +108,6 @@ export class CardSection extends HTMLElement {
     }
   }
 
-  // Card дарахад
   handleCardClick() {
     try {
       const elements = this.getElements();
@@ -138,19 +126,15 @@ export class CardSection extends HTMLElement {
     }
   }
 
-  // Event listeners нэмэх
   attachEventListeners() {
     this.addEventListener('click', () => this.handleCardClick());
   }
 
-  // Render
   render() {
     this.innerHTML = this.createCardHTML();
   }
 
-  // Cleanup
   disconnectedCallback() {
-    // Event listener автоматаар устгагдана
   }
 }
 

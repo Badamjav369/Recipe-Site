@@ -12,13 +12,11 @@ export class FoodsSection extends HTMLElement {
     this.render();
   }
 
-  // Attributes-уудыг эхлүүлэх
   initializeAttributes() {
     this.title = this.getAttribute("title") ?? "Онцлох хоолнууд";
     this.category = this.getAttribute("category") ?? null;
   }
 
-  // JSON өгөгдөл ачаалах
   async loadData() {
     try {
       const result = await fetch("./data/info.json");
@@ -36,7 +34,6 @@ export class FoodsSection extends HTMLElement {
     }
   }
 
-  // Category-аар шүүх
   filterFoods(data) {
     if (this.category) {
       return data.filter(f => f.category === this.category).slice(0, 4);
@@ -44,7 +41,6 @@ export class FoodsSection extends HTMLElement {
     return data.slice(0, 4);
   }
 
-  // Card HTML үүсгэх
   createCardHTML(food) {
     return `
       <card-section 
@@ -61,12 +57,10 @@ export class FoodsSection extends HTMLElement {
     `;
   }
 
-  // Бүх card-уудыг үүсгэх
   createCardsHTML() {
     return this.foods.map(f => this.createCardHTML(f)).join('');
   }
 
-  // Error харуулах
   renderError() {
     return `
       <section class="foods-section">
@@ -80,7 +74,6 @@ export class FoodsSection extends HTMLElement {
     `;
   }
 
-  // Success харуулах
   renderSuccess() {
     return `
       <section class="foods-section">
@@ -95,7 +88,6 @@ export class FoodsSection extends HTMLElement {
     `;
   }
 
-  // Бүх хоол харуулах
   showAllRecipes() {
     const recipes = document.querySelector("#recipes");
     const home = document.querySelector("#home");
@@ -109,7 +101,6 @@ export class FoodsSection extends HTMLElement {
     }
   }
 
-  // Event listeners нэмэх
   attachEventListeners() {
     const viewAllLink = this.querySelector(".view-all-link");
     if (viewAllLink) {
@@ -120,7 +111,6 @@ export class FoodsSection extends HTMLElement {
     }
   }
 
-  // Render хийх
   render() {
     if (this.foods.length === 0) {
       this.innerHTML = this.renderError();

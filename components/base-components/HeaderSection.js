@@ -17,7 +17,6 @@ export class HeaderSection extends HTMLElement {
     this.cleanupEventListeners();
   }
 
-  // HTML бүтэц үүсгэх
   createHTML() {
     return `
       <header>
@@ -28,7 +27,6 @@ export class HeaderSection extends HTMLElement {
     `;
   }
 
-  // Logo HTML
   createLogoHTML() {
     return `
       <a href="#" class="logo-link">
@@ -37,7 +35,6 @@ export class HeaderSection extends HTMLElement {
     `;
   }
 
-  // Navigation HTML
   createNavHTML() {
     return `
       <nav>
@@ -47,7 +44,6 @@ export class HeaderSection extends HTMLElement {
     `;
   }
 
-  // Search section HTML
   createSearchSectionHTML() {
     return `
       <section class="nevtreh-search">
@@ -59,7 +55,6 @@ export class HeaderSection extends HTMLElement {
     `;
   }
 
-  // DOM элементүүдийг cache хийх
   cacheElements() {
     this.elements = {
       home: document.querySelector("#home"),
@@ -75,12 +70,10 @@ export class HeaderSection extends HTMLElement {
     };
   }
 
-  //Хэрэглэгчийн нэвтэрсэн эсэхийг шалгах
   isUserLoggedIn() {
     return !!localStorage.getItem("userId");
   }
 
-  // Profile товч үүсгэх
   createProfileButton() {
     const profileBtn = document.createElement("button");
     profileBtn.classList.add("profile-btn");
@@ -88,7 +81,6 @@ export class HeaderSection extends HTMLElement {
     return profileBtn;
   }
 
-  // Profile товч оруулах
   insertProfileButton(profileBtn) {
     const moreSearchBtn = this.elements.searchSection?.querySelector(".more-search");
     if (this.elements.searchSection && moreSearchBtn) {
@@ -96,14 +88,12 @@ export class HeaderSection extends HTMLElement {
     }
   }
 
-  // Profile товч event нэмэх
   addProfileButtonListener(profileBtn) {
     const handler = () => this.showProfile();
     profileBtn.addEventListener("click", handler);
     this.eventListeners.push({ element: profileBtn, event: "click", handler });
   }
 
-  // Authentication шалгах
   checkAuthentication() {
     if (!this.isUserLoggedIn()) return;
 
