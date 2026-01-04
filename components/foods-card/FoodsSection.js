@@ -1,7 +1,6 @@
 export class FoodsSection extends HTMLElement {
   constructor() {
     super();
-    this.title = "";
     this.category = null;
     this.foods = [];
   }

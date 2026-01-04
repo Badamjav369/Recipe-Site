@@ -201,7 +201,6 @@ export class HeaderSection extends HTMLElement {
     container.innerHTML = filteredFoods.map(f => this.createFoodCard(f)).join("");
   }
 
-  // Хайлт хийх
   async performSearch(query) {
     try {
       const trimmedQuery = query.trim().toLowerCase();
