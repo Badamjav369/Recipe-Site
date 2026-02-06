@@ -7,3 +7,5 @@ import './recipes/RecipesMain.js';
 import './recipe-info/RecipeInfo.js';
 import './login/LoginModal.js';
 import './profile/ProfileMain.js';
+import './saved-recipes/SavedRecipesPage.js';
+import './user-recipes/UserRecipesPage.js';

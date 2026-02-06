@@ -56,7 +56,11 @@ export class FoodsSection extends HTMLElement {
         params.append('category', this.category);
       }
       params.append('status', 'approved'); // Only show approved recipes
-      params.append('limit', '4');
+      
+      // Check if mobile screen
+      const isMobile = window.innerWidth <= 480;
+      const limit = isMobile ? 2 : 4;
+      params.append('limit', limit.toString());
       
       const result = await fetch(`${API_BASE_URL}/api/recipes?${params}`);
       
@@ -98,14 +102,24 @@ export class FoodsSection extends HTMLElement {
       portion: `${recipe.servings_min}-${recipe.servings_max} хүн`,
       cal: recipe.calories,
       image: recipe.image_url
-    })).slice(0, 4);
+    }));
+    
+    // Check if mobile screen
+    const isMobile = window.innerWidth <= 480;
+    const limit = isMobile ? 2 : 4;
+    
+    return formatted.slice(0, limit);
   }
 
   filterFoods(data) {
+    // Check if mobile screen
+    const isMobile = window.innerWidth <= 480;
+    const limit = isMobile ? 2 : 4;
+    
     if (this.category) {
-      return data.filter(f => f.category === this.category).slice(0, 4);
+      return data.filter(f => f.category === this.category).slice(0, limit);
     }
-    return data.slice(0, 4);
+    return data.slice(0, limit);
   }
 
   createCardHTML(food) {
@@ -156,6 +170,29 @@ export class FoodsSection extends HTMLElement {
   }
 
   showAllRecipes() {
+    const dataType = this.getAttribute('data-type');
+    
+    // Handle saved recipes "see more"
+    if (dataType === 'saved') {
+      const profile = document.querySelector("#profile");
+      const savedRecipesPage = document.querySelector("#saved-recipes-page");
+      
+      if (profile) profile.style.display = "none";
+      if (savedRecipesPage) savedRecipesPage.style.display = "block";
+      return;
+    }
+    
+    // Handle user uploaded recipes "see more"
+    if (dataType === 'user') {
+      const profile = document.querySelector("#profile");
+      const userRecipesPage = document.querySelector("#user-recipes-page");
+      
+      if (profile) profile.style.display = "none";
+      if (userRecipesPage) userRecipesPage.style.display = "block";
+      return;
+    }
+    
+    // Default behavior for other recipe sections
     const recipes = document.querySelector("#recipes");
     const home = document.querySelector("#home");
     

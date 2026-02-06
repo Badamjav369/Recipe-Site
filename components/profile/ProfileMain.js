@@ -100,8 +100,9 @@ export class ProfileMain extends HTMLElement {
 
   createImageInputHTML() {
     return `
-      <label class="upload-box" for="image">Зураг оруулах</label><br>
-      <input type="file" id="image" name="image" accept="image/*"><br>
+      <label class="upload-box" for="image-url">Зургийн URL</label><br>
+      <input type="url" id="image-url" name="image-url" placeholder="https://example.com/image.jpg"><br>
+      <small style="color: #777;">Зургийн URL хаяг оруулна уу</small><br>
     `;
   }
 
@@ -154,10 +155,10 @@ export class ProfileMain extends HTMLElement {
       extra_info: ''
     };
 
-    // зураг
-    const imageInput = form.querySelector("#image");
-    if (imageInput?.files.length > 0) {
-      formData.image_url = `images/${imageInput.files[0].name}`;
+    // зураг URL
+    const imageUrlInput = form.querySelector("#image-url");
+    if (imageUrlInput?.value.trim()) {
+      formData.image_url = imageUrlInput.value.trim();
     }
 
     // орц - join as newline-separated text

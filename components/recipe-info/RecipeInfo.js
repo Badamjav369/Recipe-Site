@@ -53,7 +53,7 @@ export class RecipesInfo extends HTMLElement {
         id: recipe.id,
         name: recipe.title,
         type: recipe.category_name,
-        rating: recipe.rating || 0,
+        rating: parseFloat(recipe.rating || 0).toFixed(2),
         view: recipe.views || 0,
         time: recipe.cook_time,
         portion: `${recipe.servings_min}-${recipe.servings_max} хүн`,
@@ -71,7 +71,7 @@ export class RecipesInfo extends HTMLElement {
   }
 
   findRecipe(data, id) {
-    return data.find(r => r.id === id);
+    return data.find(r => r.id == id); 
   }
 
   findSimilarFoods(allFoods, currentRecipe) {
@@ -287,8 +287,8 @@ export class RecipesInfo extends HTMLElement {
 
       if (response.ok) {
         alert(`Таны үнэлгээ: ${rating} ⭐`);
-        // Reload to show updated rating
-        window.location.reload();
+        // Reload the recipe to show updated rating
+        await this.showRecipe(this.recipeId);
       } else {
         if (response.status === 404) {
           alert("Энэ жор өгөгдлийн санд байхгүй байна. Зөвхөн өөрийн нэмсэн эсвэл бусад хэрэглэгчийн нэмсэн жоруудыг үнэлж болно.");

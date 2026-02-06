@@ -66,7 +66,8 @@ export class HeaderSection extends HTMLElement {
       loginModal: document.querySelector("login-modal"),
       profileSection: document.querySelector("profile-main"),
       homeLink: this.querySelector(".nav-home"),
-      recipesLink: this.querySelector(".nav-recipes")
+      recipesLink: this.querySelector(".nav-recipes"),
+      logoLink: this.querySelector(".logo-link")
     };
   }
 
@@ -256,6 +257,12 @@ export class HeaderSection extends HTMLElement {
   }
 
   attachEventListeners() {
+    this.registerEventListener(
+      this.elements.logoLink,
+      "click",
+      (e) => this.handleHomeClick(e)
+    );
+
     this.registerEventListener(
       this.elements.homeLink,
       "click",

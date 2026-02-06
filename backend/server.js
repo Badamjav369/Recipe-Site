@@ -307,6 +307,10 @@ app.get('/api/recipes/:id', async (req, res) => {
 
     const recipe = recipes[0];
 
+    // Increment view count
+    await db.query('UPDATE recipes SET views = views + 1 WHERE id = ?', [recipeId]);
+    recipe.views = (recipe.views || 0) + 1;
+
     // RecipeSite schema stores ingredients, instructions, and extra_info as TEXT in recipes table
     // No need to query separate tables
     res.json(recipe);
@@ -497,15 +501,16 @@ app.post('/api/recipes/:id/rate', authenticateToken, async (req, res) => {
     }
 
     // Check if recipe exists
-    const recipe = await db.query('SELECT id, rating FROM recipes WHERE id = ?', [recipeId]);
+    const recipe = await db.query('SELECT id, rating, views FROM recipes WHERE id = ?', [recipeId]);
     if (recipe.length === 0) {
       return res.status(404).json({ error: 'Жор олдсонгүй' });
     }
 
-    // For now, just update the recipe's average rating
-    // In a real app, you'd want a separate ratings table to track individual user ratings
+    // Simple approach: use views as a proxy for rating count
+    // newAverage = (oldAverage * oldCount + newRating) / (oldCount + 1)
     const currentRating = recipe[0].rating || 0;
-    const newRating = currentRating === 0 ? rating : (currentRating + rating) / 2;
+    const ratingCount = Math.max(1, Math.floor(recipe[0].views / 10)); // Rough estimate
+    const newRating = ((currentRating * ratingCount) + parseFloat(rating)) / (ratingCount + 1);
 
     await db.query(
       'UPDATE recipes SET rating = ? WHERE id = ?',
@@ -514,7 +519,7 @@ app.post('/api/recipes/:id/rate', authenticateToken, async (req, res) => {
 
     res.json({ 
       message: 'Үнэлгээ амжилттай хадгалагдлаа',
-      rating: newRating 
+      rating: parseFloat(newRating.toFixed(1))
     });
   } catch (error) {
     console.error('Rate recipe error:', error);
