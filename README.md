@@ -49,7 +49,7 @@ npm install
 ```env
 DB_HOST=localhost
 DB_USER=root
-DB_PASSWORD=таны_нууц_үг
+DB_PASSWORD="StronP#45"
 DB_NAME=RecipeSite
 DB_PORT=3306
 PORT=3000
