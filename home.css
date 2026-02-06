@@ -161,8 +161,9 @@ main {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         gap: var(--space-lg);
+        overflow: hidden;
     }
 
     .food-title {
@@ -339,7 +340,6 @@ footer {
     height: 6rem;
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
     align-items: center;
     border-top: 1px solid var(--text-primary);
     width: 100%;
@@ -599,6 +599,7 @@ footer {
 }
 
 .main-recipes {
+    position: fixed;
     flex: 1;
     display: flex;
     margin-top: 11rem;
