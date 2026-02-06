@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// VALIDATION HELPERS
+// Имэйл шалгах
 const validateEmail = (email) => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
@@ -34,7 +34,7 @@ const validateRecipe = (data) => {
   return errors;
 };
 
-// AUTHENTICATION 
+// Токен шалгах
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -52,7 +52,6 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// ROOT ROUTE
 app.get('/api/test', (req, res) => {
   res.json({ message: 'Test route works!' });
 });
@@ -98,12 +97,11 @@ app.get('/api/health', (req, res) => {
 });
 
 
-/* AUTHENTICATION ROUTES */
+// Нэвтрэх
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    // Validation
     if (!email || !password) {
       return res.status(400).json({ error: 'Имэйл болон нууц үг шаардлагатай' });
     }
@@ -136,11 +134,11 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// Бүртгүүлэх
 app.post('/api/register', async (req, res) => {
   try {
     const { email, password, username } = req.body;
     
-    // Validation
     if (!email || !password || !username) {
       return res.status(400).json({ error: 'Бүх талбар шаардлагатай' });
     }
@@ -157,16 +155,13 @@ app.post('/api/register', async (req, res) => {
       return res.status(400).json({ error: 'Хэрэглэгчийн нэр 3-аас дээш тэмдэгт байх ёстой' });
     }
     
-    /* email бүртгэлтэй эсэхийг шалгах */
     const existingUsers = await db.query('SELECT * FROM users WHERE email = ?', [email]);
     if (existingUsers.length > 0) {
       return res.status(400).json({ error: 'Энэ имэйл аль хэдийн бүртгэлтэй байна' });
     }
     
-    // Hash password
     const password_hash = await bcrypt.hash(password, 10);
     
-    // Insert user
     const result = await db.query(
       'INSERT INTO users (email, password_hash, username) VALUES (?, ?, ?)',
       [email, password_hash, username]
@@ -185,18 +180,16 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-/* RECIPE ROUTES - CREATE */
+// Жор нэмэх
 app.post('/api/recipes', authenticateToken, async (req, res) => {
   try {
     const { title, category_id, region_id, cook_time, servings_min, servings_max, calories, image_url, ingredients, instructions, extra_info } = req.body;
     const userId = req.user.userId;
 
-    // Validation
     if (!title || !cook_time) {
       return res.status(400).json({ error: 'Жорын нэр болон хугацаа шаардлагатай' });
     }
 
-    // Insert recipe using RecipeSite schema
     const recipeResult = await db.query(
       `INSERT INTO recipes (user_id, title, category_id, region_id, cook_time, servings_min, servings_max, calories, image_url, ingredients, instructions, extra_info, status) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
@@ -228,9 +221,7 @@ app.post('/api/recipes', authenticateToken, async (req, res) => {
   }
 });
 
-// RECIPE ROUTES - READ
-
-// бүх жорыг үндсэн мэдээллээр авах
+// Бүх жор авах
 app.get('/api/recipes', async (req, res) => {
   try {
     const { status, category, region, limit } = req.query;
@@ -288,12 +279,11 @@ app.get('/api/recipes', async (req, res) => {
   }
 });
 
-// нэг жорыг бүх холбоотой мэдээллээр авах
+// Нэг жор авах
 app.get('/api/recipes/:id', async (req, res) => {
   try {
     const recipeId = req.params.id;
 
-    // жорын үндсэн мэдээллээр авах
     const recipes = await db.query(`
       SELECT r.*, u.username, u.email
       FROM recipes r
@@ -307,12 +297,9 @@ app.get('/api/recipes/:id', async (req, res) => {
 
     const recipe = recipes[0];
 
-    // Increment view count
     await db.query('UPDATE recipes SET views = views + 1 WHERE id = ?', [recipeId]);
     recipe.views = (recipe.views || 0) + 1;
 
-    // RecipeSite schema stores ingredients, instructions, and extra_info as TEXT in recipes table
-    // No need to query separate tables
     res.json(recipe);
   } catch (error) {
     console.error('Get recipe error:', error);
@@ -320,7 +307,7 @@ app.get('/api/recipes/:id', async (req, res) => {
   }
 });
 
-// хэрэглэгчийн жорыг авах
+// Хэрэглэгчийн жор авах
 app.get('/api/recipes/user/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -354,14 +341,13 @@ app.get('/api/recipes/user/:userId', async (req, res) => {
 });
 
 
-// RECIPE ROUTES - UPDATE
+// Жор засах
 app.put('/api/recipes/:id', authenticateToken, async (req, res) => {
   try {
     const recipeId = req.params.id;
     const userId = req.user.userId;
     const { title, category_id, region_id, cook_time, servings_min, servings_max, calories, image_url, ingredients, instructions, extra_info } = req.body;
 
-    // жор хэрэглэгчийнх эсэхийг шалгах
     const recipes = await db.query(
       'SELECT * FROM recipes WHERE id = ? AND user_id = ?',
       [recipeId, userId]
@@ -371,7 +357,6 @@ app.put('/api/recipes/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Та энэ жорыг засах эрхгүй байна' });
     }
 
-    // Update recipe using RecipeSite schema
     await db.query(
       `UPDATE recipes SET 
         title = ?, 
@@ -397,13 +382,12 @@ app.put('/api/recipes/:id', authenticateToken, async (req, res) => {
 });
 
 
-// RECIPE ROUTES - DELETE
+// Жор устгах
 app.delete('/api/recipes/:id', authenticateToken, async (req, res) => {
   try {
     const recipeId = req.params.id;
     const userId = req.user.userId;
 
-    // жор хэрэглэгчийнх эсэхийг шалгах
     const recipes = await db.query(
       'SELECT * FROM recipes WHERE id = ? AND user_id = ?',
       [recipeId, userId]
@@ -413,7 +397,6 @@ app.delete('/api/recipes/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Та энэ жорыг устгах эрхгүй байна' });
     }
 
-    //жорын бүх холбоотой мэдээллийг устгах
     await db.query('DELETE FROM recipes WHERE id = ?', [recipeId]);
 
     res.json({ message: 'Жор амжилттай устгагдлаа' });
@@ -423,7 +406,6 @@ app.delete('/api/recipes/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// CATEGORIES AND REGIONS ENDPOINTS
 app.get('/api/categories', async (req, res) => {
   try {
     const categories = await db.query('SELECT * FROM categories ORDER BY name');
@@ -444,13 +426,12 @@ app.get('/api/regions', async (req, res) => {
   }
 });
 
-// SAVED RECIPES ENDPOINTS
+// Жор хадгалах
 app.post('/api/recipes/:id/save', authenticateToken, async (req, res) => {
   try {
     const recipeId = req.params.id;
     const userId = req.user.userId;
 
-    // Check if recipe exists
     const recipe = await db.query('SELECT id FROM recipes WHERE id = ?', [recipeId]);
     if (recipe.length === 0) {
       return res.status(404).json({ error: 'Жор олдсонгүй' });
@@ -488,28 +469,24 @@ app.delete('/api/recipes/:id/save', authenticateToken, async (req, res) => {
   }
 });
 
-// Rate recipe endpoint
+// Үнэлгээ өгөх
 app.post('/api/recipes/:id/rate', authenticateToken, async (req, res) => {
   try {
     const recipeId = req.params.id;
     const userId = req.user.userId;
     const { rating } = req.body;
 
-    // Validate rating
     if (!rating || rating < 1 || rating > 5) {
       return res.status(400).json({ error: '1-5 хүртэлх үнэлгээ оруулна уу' });
     }
 
-    // Check if recipe exists
     const recipe = await db.query('SELECT id, rating, views FROM recipes WHERE id = ?', [recipeId]);
     if (recipe.length === 0) {
       return res.status(404).json({ error: 'Жор олдсонгүй' });
     }
 
-    // Simple approach: use views as a proxy for rating count
-    // newAverage = (oldAverage * oldCount + newRating) / (oldCount + 1)
     const currentRating = recipe[0].rating || 0;
-    const ratingCount = Math.max(1, Math.floor(recipe[0].views / 10)); // Rough estimate
+    const ratingCount = Math.max(1, Math.floor(recipe[0].views / 10));
     const newRating = ((currentRating * ratingCount) + parseFloat(rating)) / (ratingCount + 1);
 
     await db.query(
@@ -561,7 +538,7 @@ app.get('/api/saved-recipes', authenticateToken, async (req, res) => {
   }
 });
 
-// ERROR HANDLER MIDDLEWARE - Must be at the end
+// Алдаа шийдвэрлэх
 app.use((err, req, res, next) => {
   console.error('Error:', err);
   
@@ -576,7 +553,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Серверийн алдаа гарлаа' });
 });
 
-//сервер эхлүүлэх
 app.listen(3000, async () => {
   try {
     await db.pool.getConnection();
