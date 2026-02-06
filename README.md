@@ -72,15 +72,12 @@ node server.js
 
 #### Frontend сервер
 
-**Аргын 1: Live Server (VS Code extension) - Санал болгож байна**
+**Live Server (VS Code extension) - Санал болгож байна**
 1. VS Code-д index.html файлыг нээх
 2. Баруун товчоор "Open with Live Server" сонгох
 3. Автоматаар http://127.0.0.1:5500 эсвэл http://localhost:5500 дээр нээгдэнэ
 
-**Аргын 2: Python HTTP Server (Terminal 2)**
-```bash
-python -m http.server 8000
-```
+
 ✅ Frontend: http://localhost:8000
 
 ### 5️⃣ Сайтыг нээх
