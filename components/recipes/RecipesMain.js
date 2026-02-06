@@ -1,3 +1,5 @@
+const API_BASE_URL = 'http://localhost:3000';
+
 export class RecipesMain extends HTMLElement {
   constructor() {
     super();
@@ -38,23 +40,54 @@ export class RecipesMain extends HTMLElement {
   }
 
   async fetchCategories() {
-    const response = await fetch("./data/categories-info.json");
-    
-    if (!response.ok) {
-      throw new Error('Категори ачааллахад алдаа гарлаа');
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/categories`);
+      if (!response.ok) throw new Error('API алдаа');
+      const data = await response.json();
+      // If empty, fallback to JSON
+      if (data && data.length > 0) {
+        return ['Бүх хоол', ...data.map(c => c.name)];
+      }
+      throw new Error('Хоосон категори');
+    } catch {
+      // Fallback to JSON
+      const response = await fetch("./data/categories-info.json");
+      if (!response.ok) throw new Error('Категори ачааллахад алдаа гарлаа');
+      return await response.json();
     }
-    
-    return await response.json();
   }
 
   async fetchFoods() {
-    const response = await fetch("./data/info.json");
-    
-    if (!response.ok) {
-      throw new Error('Хоол ачааллахад алдаа гарлаа');
+    try {
+      const params = new URLSearchParams({ status: 'approved' });
+      const response = await fetch(`${API_BASE_URL}/api/recipes?${params}`);
+      if (!response.ok) throw new Error('API алдаа');
+      const data = await response.json();
+      // If empty, fallback to JSON
+      if (data && data.length > 0) {
+        return this.formatRecipes(data);
+      }
+      throw new Error('Хоосон өгөгдөл');
+    } catch {
+      // Fallback to JSON
+      const response = await fetch("./data/info.json");
+      if (!response.ok) throw new Error('Хоол ачааллахад алдаа гарлаа');
+      return await response.json();
     }
-    
-    return await response.json();
+  }
+
+  formatRecipes(recipes) {
+    return recipes.map(recipe => ({
+      id: recipe.id,
+      name: recipe.title,
+      type: recipe.category_name || recipe.type,
+      rating: recipe.rating || 0,
+      view: recipe.views || 0,
+      time: recipe.cook_time,
+      portion: `${recipe.servings_min}-${recipe.servings_max} хүн`,
+      cal: recipe.calories,
+      image: recipe.image_url
+    }));
   }
 
   createCategoryLink(category) {

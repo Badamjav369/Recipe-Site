@@ -81,7 +81,6 @@ export class LoginModal extends HTMLElement {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
-  // THIS IS THE KEY CHANGE - Now calling the backend API instead of reading JSON file
   async performLogin(data) {
     try {
       const response = await fetch(`${this.API_BASE_URL}/login`, {
@@ -97,13 +96,11 @@ export class LoginModal extends HTMLElement {
 
       const result = await response.json();
 
-      // If login failed
       if (!response.ok) {
         this.showError(result.error || "Gmail эсвэл нууц үг буруу");
         return false;
       }
 
-      // If login succeeded - save ALL the data including token
       this.saveUserData(result);
       this.showSuccess(`Амжилттай нэвтэрлээ: ${result.email}`);
       return true;
@@ -115,13 +112,10 @@ export class LoginModal extends HTMLElement {
     }
   }
 
-  // THIS IS THE OTHER KEY CHANGE - Now saving the token too!
   saveUserData(data) {
-    localStorage.setItem("token", data.token);      // ← THIS WAS MISSING!
+    localStorage.setItem("token", data.token);
     localStorage.setItem("userId", data.userId);
     localStorage.setItem("email", data.email);
-    
-    // Optional: also save username if backend returns it
     if (data.username) {
       localStorage.setItem("username", data.username);
     }
