@@ -2,15 +2,26 @@ const mysql = require('mysql2/promise');
 require('dotenv').config();
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
+  database: process.env.DB_NAME || 'recipe_db',
+  port: process.env.DB_PORT || 3306,
+  charset: 'utf8mb4',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
-async function query(sql, params) {
-  const [results] = await pool.execute(sql, params);
-  return results;
-}
-
-module.exports = { pool, query };
+module.exports = {
+  query: async (sql, params) => {
+    try {
+      const [results] = await pool.execute(sql, params);
+      return results;
+    } catch (error) {
+      console.error('Database query error:', error);
+      throw error;
+    }
+  },
+  pool
+};

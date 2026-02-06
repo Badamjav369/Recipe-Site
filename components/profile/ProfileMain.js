@@ -130,24 +130,28 @@ export class ProfileMain extends HTMLElement {
   }
 
   createSavedRecipesHTML() {
-    return `<foods-section title="Хадгалсан жорууд"></foods-section>`;
+    return `<foods-section id="saved-recipes" title="Хадгалсан жорууд" data-type="saved"></foods-section>`;
   }
 
   createUserRecipesHTML() {
-    return `<foods-section title="Оруулсан жорууд"></foods-section>`;
+    return `<foods-section id="user-recipes" title="Оруулсан жорууд" data-type="user"></foods-section>`;
   }
 
   collectFormData(form) {
+    const portionValue = form.querySelector("#portion").value.trim();
+    const servings = parseInt(portionValue) || 1;
+
     const formData = {
-      name: form.querySelector("#name").value.trim(),
-      type: form.querySelector("#type").value.trim(),
-      time: parseInt(form.querySelector("#time").value.trim()),
-      portion: form.querySelector("#portion").value.trim(),
-      calories: parseInt(form.querySelector("#cal").value.trim()),
+      title: form.querySelector("#name").value.trim(),
+      category_id: null, // Will need to map from type later
+      cook_time: parseInt(form.querySelector("#time").value.trim()),
+      servings_min: servings,
+      servings_max: servings,
+      calories: parseInt(form.querySelector("#cal").value.trim()) || null,
       image_url: '',
-      ingredients: [],
-      steps: [],
-      extras: []
+      ingredients: '',
+      instructions: '',
+      extra_info: ''
     };
 
     // зураг
@@ -156,49 +160,45 @@ export class ProfileMain extends HTMLElement {
       formData.image_url = `images/${imageInput.files[0].name}`;
     }
 
-    // орц
+    // орц - join as newline-separated text
     const ingredientsText = form.querySelector("#ingredients").value.trim();
     if (ingredientsText) {
-      formData.ingredients = ingredientsText.split('\n')
-        .map(i => i.trim())
-        .filter(i => i.length > 0);
+      formData.ingredients = ingredientsText;
     }
 
-    // алхмууд
+    // алхмууд - join as newline-separated text
     const instructionsText = form.querySelector("#instructions").value.trim();
     if (instructionsText) {
-      formData.steps = instructionsText.split('\n')
-        .map(s => s.trim())
-        .filter(s => s.length > 0);
+      formData.instructions = instructionsText;
     }
 
     // нэмэлт мэдээлэл
     const infoText = form.querySelector("#info").value.trim();
     if (infoText) {
-      formData.extras = infoText.split('\n')
-        .map(e => e.trim())
-        .filter(e => e.length > 0);
+      formData.extra_info = infoText;
     }
 
     return formData;
   }
 
   validateRecipeForm(data) {
-    const requiredFields = ['name', 'type', 'time', 'portion', 'calories'];
-    
-    for (const field of requiredFields) {
-      if (!data[field]) {
-        this.showError(`${field} талбарыг бөглөнө үү`);
-        return false;
-      }
+    // Check required fields that backend needs
+    if (!data.title || data.title.trim() === '') {
+      this.showError('Хоолны нэр талбарыг бөглөнө үү');
+      return false;
     }
 
-    if (data.ingredients.length === 0) {
+    if (!data.cook_time || data.cook_time <= 0) {
+      this.showError('Хугацаа талбарыг бөглөнө үү');
+      return false;
+    }
+
+    if (!data.ingredients || data.ingredients.trim() === '') {
       this.showError('Орц оруулна уу');
       return false;
     }
 
-    if (data.steps.length === 0) {
+    if (!data.instructions || data.instructions.trim() === '') {
       this.showError('Хийх дарааллыг оруулна уу');
       return false;
     }
@@ -306,16 +306,69 @@ export class ProfileMain extends HTMLElement {
 
   render() {
     this.innerHTML = this.createProfileHTML();
+    // Load recipes after rendering - wait for elements to be fully connected
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        console.log('Loading user and saved recipes...');
+        this.loadUserRecipes();
+        this.loadSavedRecipes();
+      }, 200);
+    });
   }
 
   async loadUserRecipes() {
     try {
-      const response = await fetch(`${this.API_BASE_URL}/recipes/user/${this.userData.userId}`);
+      const response = await fetch(`${this.API_BASE_URL}/recipes/user/${this.userData.userId}`, {
+        headers: {
+          'Authorization': `Bearer ${this.userData.token}`
+        }
+      });
+      if (!response.ok) throw new Error('Failed to load user recipes');
       const recipes = await response.json();
       console.log('User recipes:', recipes);
+      
+      // Update the foods-section component
+      const userRecipesSection = this.querySelector('#user-recipes');
+      if (userRecipesSection && recipes.length > 0) {
+        userRecipesSection.setAttribute('data-recipes', JSON.stringify(recipes));
+      }
       return recipes;
     } catch (error) {
-      console.error('Load recipes error:', error);
+      console.error('Load user recipes error:', error);
+      return [];
+    }
+  }
+
+  async loadSavedRecipes() {
+    try {
+      console.log('Loading saved recipes...');
+      const response = await fetch(`${this.API_BASE_URL}/saved-recipes`, {
+        headers: {
+          'Authorization': `Bearer ${this.userData.token}`
+        }
+      });
+      if (!response.ok) throw new Error('Failed to load saved recipes');
+      const recipes = await response.json();
+      console.log('Saved recipes loaded:', recipes);
+      
+      // Update the foods-section component
+      const savedRecipesSection = this.querySelector('#saved-recipes');
+      console.log('Saved recipes section element:', savedRecipesSection);
+      
+      if (savedRecipesSection) {
+        if (recipes.length > 0) {
+          savedRecipesSection.setAttribute('data-recipes', JSON.stringify(recipes));
+          console.log('Set data-recipes attribute with', recipes.length, 'recipes');
+        } else {
+          console.log('No saved recipes to display');
+        }
+      } else {
+        console.error('Saved recipes section not found!');
+      }
+      return recipes;
+    } catch (error) {
+      console.error('Load saved recipes error:', error);
+      return [];
     }
   }
 }
