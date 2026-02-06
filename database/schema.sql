@@ -54,6 +54,13 @@ CREATE TABLE IF NOT EXISTS user_saved_recipes (
     FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
 );
 
+-- Insert test users (run create-test-users.js to set proper passwords)
+-- Note: These are placeholder hashes. Use: node backend/create-test-users.js
+INSERT INTO users (username, email, password_hash) VALUES 
+('badamjav', 'badamjav@gmail.com', '$2b$10$placeholder'),
+('yalguun', 'yalguun@gmail.com', '$2b$10$placeholder')
+ON DUPLICATE KEY UPDATE username=username;
+
 -- Insert regions
 INSERT INTO regions (name) VALUES 
 ('Монгол'),
