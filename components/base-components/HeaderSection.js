@@ -114,6 +114,11 @@ export class HeaderSection extends HTMLElement {
         this.elements[section].style.display = "none";
       }
     });
+    
+    const savedRecipesPage = document.querySelector('#saved-recipes-page');
+    const userRecipesPage = document.querySelector('#user-recipes-page');
+    if (savedRecipesPage) savedRecipesPage.style.display = 'none';
+    if (userRecipesPage) userRecipesPage.style.display = 'none';
   }
 
   showProfile() {

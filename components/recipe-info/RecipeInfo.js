@@ -241,7 +241,7 @@ export class RecipesInfo extends HTMLElement {
     const similarHTML = this.createSimilarFoodsHTML(similarFoods, hasSimilarFoods);
     const sectionTitle = hasSimilarFoods && similarFoods.length > 0 ? "Ойролцоо хоолнууд" : "Санал болгох хоолнууд";
     
-    const seeMoreLink = !hasSimilarFoods && similarFoods.length > 0 
+    const seeMoreLink = similarFoods.length > 0 
       ? '<a href="#" class="view-all-link">Бүгдийг үзэх &#8594;</a>'
       : '';
 
