@@ -11,7 +11,7 @@ export class FoodsSection extends HTMLElement {
     console.log('FoodsSection connected:', this.title);
     this.initializeAttributes();
     
-    // Check if recipes are provided via attribute
+    // Attribute-аар дамжуулсан жорыг шалгах
     const recipesData = this.getAttribute('data-recipes');
     if (recipesData) {
       try {
@@ -27,7 +27,7 @@ export class FoodsSection extends HTMLElement {
     console.log('FoodsSection foods loaded:', this.foods.length);
     this.render();
 
-    // Listen for window resize to update card display
+    // Дэлгэцийн хэмжээ өөрчлөгдөхөд карт шинэчлэх
     this.resizeHandler = () => this.handleResize();
     window.addEventListener('resize', this.resizeHandler);
   }
@@ -39,7 +39,6 @@ export class FoodsSection extends HTMLElement {
   }
 
   handleResize() {
-    // Debounce resize handling
     clearTimeout(this.resizeTimeout);
     this.resizeTimeout = setTimeout(() => {
       if (this.foods && this.foods.length > 0) {
@@ -70,14 +69,13 @@ export class FoodsSection extends HTMLElement {
 
   async loadData() {
     try {
-      // Fetch from backend API
       const params = new URLSearchParams();
       if (this.category) {
         params.append('category', this.category);
       }
-      params.append('status', 'approved'); // Only show approved recipes
+      params.append('status', 'approved');
       
-      // Dynamic limit based on screen size
+      // Дэлгэцийн хэмжээгээр картын тоо тогтоох
       const limit = this.getCardLimitForScreenSize();
       params.append('limit', limit.toString());
       
@@ -89,7 +87,7 @@ export class FoodsSection extends HTMLElement {
       
       const data = await result.json();
       
-      // If API returns empty, fallback to JSON
+      // API хоосон бол JSON файл руу буцах
       if (data && data.length > 0) {
         this.foods = this.formatRecipes(data);
       } else {
@@ -98,7 +96,7 @@ export class FoodsSection extends HTMLElement {
       
     } catch (error) {
       console.error('FoodsSection өгөгдөл ачааллахад алдаа:', error);
-      // Fallback to JSON file if API fails or returns empty
+      // API амжилтгүй бол JSON файлаас унших
       try {
         const result = await fetch("./data/info.json");
         const data = await result.json();
@@ -113,21 +111,21 @@ export class FoodsSection extends HTMLElement {
     const width = window.innerWidth;
     
     if (width <= 480) {
-      return 2; // Mobile
+      return 2;
     } else if (width <= 768) {
-      return 4; // Tablet portrait
+      return 4;
     } else if (width <= 1024) {
-      return 4; // Tablet landscape
+      return 4;
     } else if (width <= 1200) {
-      return 6; // Small desktop
+      return 6;
     } else if (width <= 1400) {
-      return 6; // Medium desktop
+      return 6;
     } else {
-      return 8; // Large desktop
+      return 8;
     }
   }
 
-  // Format backend data to match frontend structure
+  // Backend өгөгдлийг frontend бүтэцэд хөрвүүлэх
   formatRecipes(recipes) {
     const formatted = recipes.map(recipe => ({
       id: recipe.id,
@@ -141,13 +139,11 @@ export class FoodsSection extends HTMLElement {
       image: recipe.image_url || '.images/.food-images/.default.png'
     }));
     
-    // Apply screen size limit
     const limit = this.getCardLimitForScreenSize();
     return formatted.slice(0, limit);
   }
 
   filterFoods(data) {
-    // Apply screen size limit
     const limit = this.getCardLimitForScreenSize();
     
     if (this.category) {
@@ -173,7 +169,6 @@ export class FoodsSection extends HTMLElement {
   }
 
   createCardsHTML() {
-    // Apply responsive limit to cards being displayed
     const limit = this.getCardLimitForScreenSize();
     const displayFoods = this.foods.slice(0, limit);
     return displayFoods.map(f => this.createCardHTML(f)).join('');
@@ -209,7 +204,7 @@ export class FoodsSection extends HTMLElement {
   showAllRecipes() {
     const dataType = this.getAttribute('data-type');
     
-    // Handle saved recipes "see more"
+    // Хадгалсан жорын "дэлгэрэнгүй"
     if (dataType === 'saved') {
       const profile = document.querySelector("#profile");
       const savedRecipesPage = document.querySelector("#saved-recipes-page");
@@ -219,7 +214,7 @@ export class FoodsSection extends HTMLElement {
       return;
     }
     
-    // Handle user uploaded recipes "see more"
+    // Хэрэглэгчийн оруулсан жорын "дэлгэрэнгүй"
     if (dataType === 'user') {
       const profile = document.querySelector("#profile");
       const userRecipesPage = document.querySelector("#user-recipes-page");
@@ -229,7 +224,7 @@ export class FoodsSection extends HTMLElement {
       return;
     }
     
-    // Default behavior for other recipe sections
+    // Бусад жорын хэсгийн үндсэн үйлдэл
     const recipes = document.querySelector("#recipes");
     const home = document.querySelector("#home");
     
@@ -254,7 +249,6 @@ export class FoodsSection extends HTMLElement {
 
   render() {
     if (this.foods.length === 0) {
-      // Show empty state message instead of error for saved/user recipes
       const dataType = this.getAttribute('data-type');
       if (dataType === 'saved') {
         this.innerHTML = `

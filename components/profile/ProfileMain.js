@@ -144,7 +144,7 @@ export class ProfileMain extends HTMLElement {
 
     const formData = {
       title: form.querySelector("#name").value.trim(),
-      category_id: null, // Will need to map from type later
+      category_id: null,
       cook_time: parseInt(form.querySelector("#time").value.trim()),
       servings_min: servings,
       servings_max: servings,
@@ -155,19 +155,19 @@ export class ProfileMain extends HTMLElement {
       extra_info: ''
     };
 
-    // зураг URL
+    // зураг
     const imageUrlInput = form.querySelector("#image-url");
     if (imageUrlInput?.value.trim()) {
       formData.image_url = imageUrlInput.value.trim();
     }
 
-    // орц - join as newline-separated text
+    // орц
     const ingredientsText = form.querySelector("#ingredients").value.trim();
     if (ingredientsText) {
       formData.ingredients = ingredientsText;
     }
 
-    // алхмууд - join as newline-separated text
+    // хийх дараалал
     const instructionsText = form.querySelector("#instructions").value.trim();
     if (instructionsText) {
       formData.instructions = instructionsText;
@@ -183,7 +183,6 @@ export class ProfileMain extends HTMLElement {
   }
 
   validateRecipeForm(data) {
-    // Check required fields that backend needs
     if (!data.title || data.title.trim() === '') {
       this.showError('Хоолны нэр талбарыг бөглөнө үү');
       return false;
@@ -307,7 +306,6 @@ export class ProfileMain extends HTMLElement {
 
   render() {
     this.innerHTML = this.createProfileHTML();
-    // Load recipes after rendering - wait for elements to be fully connected
     requestAnimationFrame(() => {
       setTimeout(() => {
         console.log('Loading user and saved recipes...');
@@ -328,7 +326,6 @@ export class ProfileMain extends HTMLElement {
       const recipes = await response.json();
       console.log('User recipes:', recipes);
       
-      // Format recipes to match FoodsSection expectations
       const formattedRecipes = recipes.map(recipe => ({
         ...recipe,
         title: recipe.title,
@@ -336,7 +333,6 @@ export class ProfileMain extends HTMLElement {
         category_name: recipe.category_name || 'Хоол'
       }));
       
-      // Update the foods-section component
       const userRecipesSection = this.querySelector('#user-recipes');
       if (userRecipesSection) {
         if (formattedRecipes.length > 0) {
@@ -362,7 +358,6 @@ export class ProfileMain extends HTMLElement {
       const recipes = await response.json();
       console.log('Saved recipes loaded:', recipes);
       
-      // Format recipes to match FoodsSection expectations
       const formattedRecipes = recipes.map(recipe => ({
         ...recipe,
         title: recipe.title,
@@ -370,7 +365,6 @@ export class ProfileMain extends HTMLElement {
         category_name: recipe.category_name || 'Хоол'
       }));
       
-      // Update the foods-section component
       const savedRecipesSection = this.querySelector('#saved-recipes');
       console.log('Saved recipes section element:', savedRecipesSection);
       

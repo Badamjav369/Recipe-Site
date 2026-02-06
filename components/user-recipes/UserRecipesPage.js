@@ -41,7 +41,6 @@ export class UserRecipesPage extends HTMLElement {
   }
 
   formatRecipe(recipe) {
-    // Handle image URL - if it's a full URL use it, otherwise construct path
     let imageUrl = 'images/food-images/default.jpg';
     if (recipe.image_url) {
       if (recipe.image_url.startsWith('http')) {
