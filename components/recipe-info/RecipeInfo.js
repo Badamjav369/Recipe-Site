@@ -1,3 +1,5 @@
+const API_BASE_URL = 'http://localhost:3000';
+
 export class RecipesInfo extends HTMLElement {
   constructor() {
     super();
@@ -12,6 +14,18 @@ export class RecipesInfo extends HTMLElement {
   }
 
   async loadRecipeData(id) {
+    try {
+      // Try backend first
+      const recipeRes = await fetch(`${API_BASE_URL}/api/recipes/${id}`);
+      if (recipeRes.ok) {
+        const recipe = await recipeRes.json();
+        return this.formatBackendData(recipe);
+      }
+    } catch (error) {
+      console.error('Backend алдаа:', error);
+    }
+
+    // Fallback to JSON
     try {
       const [infoRes, detailsRes] = await Promise.all([
         fetch("./data/info.json"),
@@ -31,6 +45,29 @@ export class RecipesInfo extends HTMLElement {
       console.error('Recipe өгөгдөл ачааллахад алдаа:', error);
       throw error;
     }
+  }
+
+  formatBackendData(recipe) {
+    return {
+      infoData: [{
+        id: recipe.id,
+        name: recipe.title,
+        type: recipe.category_name,
+        rating: recipe.rating || 0,
+        view: recipe.views || 0,
+        time: recipe.cook_time,
+        portion: `${recipe.servings_min}-${recipe.servings_max} хүн`,
+        cal: recipe.calories,
+        image: recipe.image_url
+      }],
+      detailsData: [{
+        id: recipe.id,
+        ingredients: recipe.ingredients ? recipe.ingredients.split('\n') : [],
+        steps: recipe.instructions ? recipe.instructions.split('\n') : [],
+        extra: recipe.extra_info ? recipe.extra_info.split('\n') : [],
+        username: recipe.username || 'Хэрэглэгч'
+      }]
+    };
   }
 
   findRecipe(data, id) {
@@ -182,33 +219,86 @@ export class RecipesInfo extends HTMLElement {
     `;
   }
 
-  handleSaveButton() {
-    const userId = localStorage.getItem("userId");
+  async handleSaveButton() {
+    console.log('Save button clicked for recipe:', this.recipeId);
+    const token = localStorage.getItem("token");
+    console.log('Token found:', token ? 'Yes' : 'No');
     
-    if (!userId) {
+    if (!token) {
       alert("Жор хадгалахын тулд нэвтэрнэ үү");
       return;
     }
 
-    console.log("Жор хадгалах:", this.recipeId);
-    alert("Жор амжилттай хадгалагдлаа! (Одоогоор backend байхгүй)");
+    try {
+      const url = `${API_BASE_URL}/api/recipes/${this.recipeId}/save`;
+      console.log('Saving to:', url);
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      console.log('Save response status:', response.status);
+      const result = await response.json();
+      console.log('Save response:', result);
+
+      if (response.ok) {
+        alert("Жор амжилттай хадгалагдлаа!");
+        console.log('Recipe saved successfully!');
+      } else {
+        if (response.status === 404) {
+          alert("Энэ жор өгөгдлийн санд байхгүй байна. Зөвхөн өөрийн нэмсэн эсвэл бусад хэрэглэгчийн нэмсэн жоруудыг хадгалж болно.");
+        } else {
+          alert(result.error || "Жор хадгалахад алдаа гарлаа");
+        }
+      }
+    } catch (error) {
+      console.error('Save error:', error);
+      alert("Серверт холбогдоход алдаа гарлаа");
+    }
   }
 
-  handleRateButton() {
-    const userId = localStorage.getItem("userId");
+  async handleRateButton() {
+    const token = localStorage.getItem("token");
     
-    if (!userId) {
+    if (!token) {
       alert("Үнэлгээ өгөхийн тулд нэвтэрнэ үү");
       return;
     }
 
     const rating = prompt("1-5 хүртэлх үнэлгээ оруулна уу:");
     
-    if (rating && rating >= 1 && rating <= 5) {
-      console.log("Үнэлгээ өгөх:", { recipeId: this.recipeId, rating });
-      alert(`Таны үнэлгээ: ${rating} ⭐ (Одоогоор backend байхгүй)`);
-    } else if (rating) {
-      alert("1-5 хүртэлх тоо оруулна уу");
+    if (!rating || rating < 1 || rating > 5) {
+      if (rating) alert("1-5 хүртэлх тоо оруулна уу");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/recipes/${this.recipeId}/rate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ rating: Number(rating) })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert(`Таны үнэлгээ: ${rating} ⭐`);
+        // Reload to show updated rating
+        window.location.reload();
+      } else {
+        if (response.status === 404) {
+          alert("Энэ жор өгөгдлийн санд байхгүй байна. Зөвхөн өөрийн нэмсэн эсвэл бусад хэрэглэгчийн нэмсэн жоруудыг үнэлж болно.");
+        } else {
+          alert(result.error || "Үнэлгээ өгөхөд алдаа гарлаа");
+        }
+      }
+    } catch (error) {
+      console.error('Rate error:', error);
+      alert("Серверт холбогдоход алдаа гарлаа");
     }
   }
 

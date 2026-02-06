@@ -222,7 +222,7 @@ main {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-top: var(--space-sm);
+        margin-top: var(--space-md);
         
         h4 {
             font-size: var(--font-md);

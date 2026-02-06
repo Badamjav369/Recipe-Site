@@ -1,3 +1,5 @@
+const API_BASE_URL = 'http://localhost:3000';
+
 export class FoodsSection extends HTMLElement {
   constructor() {
     super();
@@ -6,9 +8,39 @@ export class FoodsSection extends HTMLElement {
   }
 
   async connectedCallback() {
+    console.log('FoodsSection connected:', this.title);
     this.initializeAttributes();
-    await this.loadData();
+    
+    // Check if recipes are provided via attribute
+    const recipesData = this.getAttribute('data-recipes');
+    if (recipesData) {
+      try {
+        this.foods = this.formatRecipes(JSON.parse(recipesData));
+      } catch (error) {
+        console.error('Error parsing recipes data:', error);
+        await this.loadData();
+      }
+    } else {
+      await this.loadData();
+    }
+    
+    console.log('FoodsSection foods loaded:', this.foods.length);
     this.render();
+  }
+
+  static get observedAttributes() {
+    return ['data-recipes'];
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === 'data-recipes' && newValue && newValue !== oldValue) {
+      try {
+        this.foods = this.formatRecipes(JSON.parse(newValue));
+        this.render();
+      } catch (error) {
+        console.error('Error parsing recipes data:', error);
+      }
+    }
   }
 
   initializeAttributes() {
@@ -18,19 +50,55 @@ export class FoodsSection extends HTMLElement {
 
   async loadData() {
     try {
-      const result = await fetch("./data/info.json");
+      // Fetch from backend API
+      const params = new URLSearchParams();
+      if (this.category) {
+        params.append('category', this.category);
+      }
+      params.append('status', 'approved'); // Only show approved recipes
+      params.append('limit', '4');
+      
+      const result = await fetch(`${API_BASE_URL}/api/recipes?${params}`);
       
       if (!result.ok) {
-        throw new Error('Файл уншихад алдаа гарлаа');
+        throw new Error('API алдаа гарлаа');
       }
       
       const data = await result.json();
-      this.foods = this.filterFoods(data);
+      
+      // If API returns empty, fallback to JSON
+      if (data && data.length > 0) {
+        this.foods = this.formatRecipes(data);
+      } else {
+        throw new Error('Хоосон өгөгдөл');
+      }
       
     } catch (error) {
       console.error('FoodsSection өгөгдөл ачааллахад алдаа:', error);
-      this.foods = [];
+      // Fallback to JSON file if API fails or returns empty
+      try {
+        const result = await fetch("./data/info.json");
+        const data = await result.json();
+        this.foods = this.filterFoods(data);
+      } catch {
+        this.foods = [];
+      }
     }
+  }
+
+  // Format backend data to match frontend structure
+  formatRecipes(recipes) {
+    return recipes.map(recipe => ({
+      id: recipe.id,
+      name: recipe.title,
+      type: recipe.category_name || recipe.type,
+      rating: recipe.rating || 0,
+      view: recipe.views || 0,
+      time: recipe.cook_time,
+      portion: `${recipe.servings_min}-${recipe.servings_max} хүн`,
+      cal: recipe.calories,
+      image: recipe.image_url
+    })).slice(0, 4);
   }
 
   filterFoods(data) {
@@ -112,7 +180,33 @@ export class FoodsSection extends HTMLElement {
 
   render() {
     if (this.foods.length === 0) {
-      this.innerHTML = this.renderError();
+      // Show empty state message instead of error for saved/user recipes
+      const dataType = this.getAttribute('data-type');
+      if (dataType === 'saved') {
+        this.innerHTML = `
+          <section class="foods-section">
+            <section class="food-title">
+              <h2>${this.title}</h2>
+            </section>
+            <p style="text-align: center; color: #777; padding: 1rem;">
+              Хадгалсан жор байхгүй байна.
+            </p>
+          </section>
+        `;
+      } else if (dataType === 'user') {
+        this.innerHTML = `
+          <section class="foods-section">
+            <section class="food-title">
+              <h2>${this.title}</h2>
+            </section>
+            <p style="text-align: center; color: #777; padding: 1rem;">
+              Оруулсан жор байхгүй байна.
+            </p>
+          </section>
+        `;
+      } else {
+        this.innerHTML = this.renderError();
+      }
     } else {
       this.innerHTML = this.renderSuccess();
       this.attachEventListeners();
