@@ -328,12 +328,22 @@ export class ProfileMain extends HTMLElement {
       const recipes = await response.json();
       console.log('User recipes:', recipes);
       
+      // Format recipes to match FoodsSection expectations
+      const formattedRecipes = recipes.map(recipe => ({
+        ...recipe,
+        title: recipe.title,
+        image_url: recipe.image_url || '.images/.food-images/.default.png',
+        category_name: recipe.category_name || 'Хоол'
+      }));
+      
       // Update the foods-section component
       const userRecipesSection = this.querySelector('#user-recipes');
-      if (userRecipesSection && recipes.length > 0) {
-        userRecipesSection.setAttribute('data-recipes', JSON.stringify(recipes));
+      if (userRecipesSection) {
+        if (formattedRecipes.length > 0) {
+          userRecipesSection.setAttribute('data-recipes', JSON.stringify(formattedRecipes));
+        }
       }
-      return recipes;
+      return formattedRecipes;
     } catch (error) {
       console.error('Load user recipes error:', error);
       return [];
@@ -352,21 +362,29 @@ export class ProfileMain extends HTMLElement {
       const recipes = await response.json();
       console.log('Saved recipes loaded:', recipes);
       
+      // Format recipes to match FoodsSection expectations
+      const formattedRecipes = recipes.map(recipe => ({
+        ...recipe,
+        title: recipe.title,
+        image_url: recipe.image_url || '.images/.food-images/.default.png',
+        category_name: recipe.category_name || 'Хоол'
+      }));
+      
       // Update the foods-section component
       const savedRecipesSection = this.querySelector('#saved-recipes');
       console.log('Saved recipes section element:', savedRecipesSection);
       
       if (savedRecipesSection) {
-        if (recipes.length > 0) {
-          savedRecipesSection.setAttribute('data-recipes', JSON.stringify(recipes));
-          console.log('Set data-recipes attribute with', recipes.length, 'recipes');
+        if (formattedRecipes.length > 0) {
+          savedRecipesSection.setAttribute('data-recipes', JSON.stringify(formattedRecipes));
+          console.log('Set data-recipes attribute with', formattedRecipes.length, 'recipes');
         } else {
           console.log('No saved recipes to display');
         }
       } else {
         console.error('Saved recipes section not found!');
       }
-      return recipes;
+      return formattedRecipes;
     } catch (error) {
       console.error('Load saved recipes error:', error);
       return [];

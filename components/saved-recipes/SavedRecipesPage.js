@@ -55,10 +55,10 @@ export class SavedRecipesPage extends HTMLElement {
       id: recipe.id,
       name: recipe.title,
       image: imageUrl,
-      time: recipe.cook_time || '30 мин',
+      time: (recipe.cook_time || '30') + ' мин',
       servings: `${recipe.servings_min || 2}-${recipe.servings_max || 4} хүн`,
-      calories: recipe.calories || '250 ккал',
-      rating: recipe.rating || '0',
+      calories: (recipe.calories || '250') + ' ккал',
+      rating: parseFloat(recipe.rating || 0).toFixed(2),
       views: recipe.views || 0,
       category: recipe.category_name || 'Бусад'
     };
@@ -72,23 +72,23 @@ export class SavedRecipesPage extends HTMLElement {
         <section class="type-rate">
           <h4>${formatted.category}</h4>
           <section class="rate">
-            <img src="images/icon-images/star.png" alt="rating">
+            <img src="./images/food.svg" alt="rating">
             <p>${formatted.rating}</p>
             <span>(${formatted.views})</span>
           </section>
         </section>
         <h3 class="food-name">${formatted.name}</h3>
         <section class="time-member-kalore">
-          <p>
-            <img src="images/icon-images/time.png" alt="time">
+          <p style="display: inline-flex; align-items: center; gap: 4px;">
+            <img src="./images/time.svg" alt="time">
             ${formatted.time}
           </p>
-          <p>
-            <img src="images/icon-images/member.png" alt="servings">
+          <p style="display: inline-flex; align-items: center; gap: 4px;">
+            <img src="./images/people.svg" alt="servings">
             ${formatted.servings}
           </p>
-          <p>
-            <img src="images/icon-images/kalore.png" alt="calories">
+          <p style="display: inline-flex; align-items: center; gap: 4px;">
+            <img src="./images/calore.svg" alt="calories">
             ${formatted.calories}
           </p>
         </section>

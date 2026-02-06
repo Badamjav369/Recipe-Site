@@ -26,6 +26,26 @@ export class FoodsSection extends HTMLElement {
     
     console.log('FoodsSection foods loaded:', this.foods.length);
     this.render();
+
+    // Listen for window resize to update card display
+    this.resizeHandler = () => this.handleResize();
+    window.addEventListener('resize', this.resizeHandler);
+  }
+
+  disconnectedCallback() {
+    if (this.resizeHandler) {
+      window.removeEventListener('resize', this.resizeHandler);
+    }
+  }
+
+  handleResize() {
+    // Debounce resize handling
+    clearTimeout(this.resizeTimeout);
+    this.resizeTimeout = setTimeout(() => {
+      if (this.foods && this.foods.length > 0) {
+        this.render();
+      }
+    }, 250);
   }
 
   static get observedAttributes() {
@@ -57,9 +77,8 @@ export class FoodsSection extends HTMLElement {
       }
       params.append('status', 'approved'); // Only show approved recipes
       
-      // Check if mobile screen
-      const isMobile = window.innerWidth <= 480;
-      const limit = isMobile ? 2 : 4;
+      // Dynamic limit based on screen size
+      const limit = this.getCardLimitForScreenSize();
       params.append('limit', limit.toString());
       
       const result = await fetch(`${API_BASE_URL}/api/recipes?${params}`);
@@ -90,31 +109,46 @@ export class FoodsSection extends HTMLElement {
     }
   }
 
+  getCardLimitForScreenSize() {
+    const width = window.innerWidth;
+    
+    if (width <= 480) {
+      return 2; // Mobile
+    } else if (width <= 768) {
+      return 4; // Tablet portrait
+    } else if (width <= 1024) {
+      return 4; // Tablet landscape
+    } else if (width <= 1200) {
+      return 6; // Small desktop
+    } else if (width <= 1400) {
+      return 6; // Medium desktop
+    } else {
+      return 8; // Large desktop
+    }
+  }
+
   // Format backend data to match frontend structure
   formatRecipes(recipes) {
-    return recipes.map(recipe => ({
+    const formatted = recipes.map(recipe => ({
       id: recipe.id,
       name: recipe.title,
-      type: recipe.category_name || recipe.type,
+      type: recipe.category_name || recipe.type || 'Хоол',
       rating: recipe.rating || 0,
       view: recipe.views || 0,
       time: recipe.cook_time,
-      portion: `${recipe.servings_min}-${recipe.servings_max} хүн`,
+      portion: `${recipe.servings_min || 2}-${recipe.servings_max || 4} хүн`,
       cal: recipe.calories,
-      image: recipe.image_url
+      image: recipe.image_url || '.images/.food-images/.default.png'
     }));
     
-    // Check if mobile screen
-    const isMobile = window.innerWidth <= 480;
-    const limit = isMobile ? 2 : 4;
-    
+    // Apply screen size limit
+    const limit = this.getCardLimitForScreenSize();
     return formatted.slice(0, limit);
   }
 
   filterFoods(data) {
-    // Check if mobile screen
-    const isMobile = window.innerWidth <= 480;
-    const limit = isMobile ? 2 : 4;
+    // Apply screen size limit
+    const limit = this.getCardLimitForScreenSize();
     
     if (this.category) {
       return data.filter(f => f.category === this.category).slice(0, limit);
@@ -139,7 +173,10 @@ export class FoodsSection extends HTMLElement {
   }
 
   createCardsHTML() {
-    return this.foods.map(f => this.createCardHTML(f)).join('');
+    // Apply responsive limit to cards being displayed
+    const limit = this.getCardLimitForScreenSize();
+    const displayFoods = this.foods.slice(0, limit);
+    return displayFoods.map(f => this.createCardHTML(f)).join('');
   }
 
   renderError() {

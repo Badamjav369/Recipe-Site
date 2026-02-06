@@ -20,7 +20,7 @@ export class CardSection extends HTMLElement {
       portion: this.getAttribute("portion") ?? "-",
       cal: this.getAttribute("cal") ?? "-",
       view: this.getAttribute("view") ?? 0,
-      image: this.getAttribute("image") ?? "images/food-images/default.jpg"
+      image: this.getAttribute("image") ?? "./images/food-images/pizza.jpg"
     };
   }
 
@@ -39,7 +39,7 @@ export class CardSection extends HTMLElement {
       <section class="type-rate">
         <h4>${this.cardData.type}</h4>
         <article class="rate">
-          <img src="images/food.svg" alt="food-image">
+          <img src="./images/food.svg" alt="food-image">
           <p>
             ${this.cardData.rating}
             <span>(${this.cardData.view})</span>
@@ -56,9 +56,9 @@ export class CardSection extends HTMLElement {
   createDetailsHTML() {
     return `
       <section class="time-member-kalore">
-        ${this.createDetailItem("images/time.svg", "time-icon", `${this.cardData.time} мин`)}
-        ${this.createDetailItem("images/people.svg", "people-icon", this.cardData.portion)}
-        ${this.createDetailItem("images/calore.svg", "calore-icon", `${this.cardData.cal} ккал`)}
+        ${this.createDetailItem("./images/time.svg", "time-icon", `${this.cardData.time} мин`)}
+        ${this.createDetailItem("./images/people.svg", "people-icon", this.cardData.portion)}
+        ${this.createDetailItem("./images/calore.svg", "calore-icon", `${this.cardData.cal} ккал`)}
       </section>
     `;
   }

@@ -15,7 +15,6 @@ export class RecipesInfo extends HTMLElement {
 
   async loadRecipeData(id) {
     try {
-      // Try backend first
       const recipeRes = await fetch(`${API_BASE_URL}/api/recipes/${id}`);
       if (recipeRes.ok) {
         const recipe = await recipeRes.json();
@@ -25,7 +24,6 @@ export class RecipesInfo extends HTMLElement {
       console.error('Backend алдаа:', error);
     }
 
-    // Fallback to JSON
     try {
       const [infoRes, detailsRes] = await Promise.all([
         fetch("./data/info.json"),
@@ -71,14 +69,74 @@ export class RecipesInfo extends HTMLElement {
   }
 
   findRecipe(data, id) {
-    return data.find(r => r.id == id); 
+    return data.find(r => r.id == id);
   }
 
-  findSimilarFoods(allFoods, currentRecipe) {
-    return allFoods
+  async findSimilarFoods(allFoods, currentRecipe) {
+    let similarFoods = allFoods
       .filter(f => f.type === currentRecipe.type && f.id !== currentRecipe.id)
       .sort((a, b) => this.parseView(b.view) - this.parseView(a.view))
       .slice(0, 4);
+    
+    if (similarFoods.length === 0) {
+      try {
+        similarFoods = await this.fetchSuggestedFoods(currentRecipe.id);
+      } catch (error) {
+        console.error('Error fetching suggested foods:', error);
+        similarFoods = allFoods
+          .filter(f => f.id !== currentRecipe.id)
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 4);
+      }
+    }
+    
+    return similarFoods;
+  }
+
+  async fetchSuggestedFoods(currentRecipeId) {
+    try {
+      const limit = this.getCardLimitForScreenSize();
+      
+      const response = await fetch(`${API_BASE_URL}/api/recipes?status=approved&limit=${limit + 2}`);
+      if (!response.ok) throw new Error('API request failed');
+      
+      const recipes = await response.json();
+      return recipes
+        .filter(r => r.id !== currentRecipeId)
+        .map(recipe => ({
+          id: recipe.id,
+          name: recipe.title,
+          type: recipe.category_name || 'Хоол',
+          rating: parseFloat(recipe.rating || 0).toFixed(2),
+          view: recipe.views || 0,
+          time: recipe.cook_time,
+          portion: `${recipe.servings_min}-${recipe.servings_max} хүн`,
+          cal: recipe.calories,
+          image: recipe.image_url
+        }))
+        .slice(0, limit);
+    } catch (error) {
+      console.error('Failed to fetch suggested foods:', error);
+      throw error;
+    }
+  }
+
+  getCardLimitForScreenSize() {
+    const width = window.innerWidth;
+    
+    if (width <= 480) {
+      return 2;
+    } else if (width <= 768) {
+      return 4;
+    } else if (width <= 1024) {
+      return 4;
+    } else if (width <= 1200) {
+      return 6;
+    } else if (width <= 1400) {
+      return 6;
+    } else {
+      return 8;
+    }
   }
 
   parseView(view) {
@@ -166,19 +224,26 @@ export class RecipesInfo extends HTMLElement {
     `;
   }
 
-  createSimilarFoodsHTML(similarFoods) {
+  createSimilarFoodsHTML(similarFoods, hasSimilarFoods = true) {
     if (similarFoods.length === 0) {
-      return "<p>Ойролцоо хоол олдсонгүй</p>";
+      return "<p>Санал болгох хоол олдсонгүй</p>";
     }
+    
+    const title = hasSimilarFoods ? "Ойролцоо хоолнууд" : "Санал болгох хоолнууд";
     return similarFoods.map(f => this.createSimilarFoodCard(f)).join("");
   }
 
-  createRecipeHTML(recipe, details, similarFoods) {
+  createRecipeHTML(recipe, details, similarFoods, hasSimilarFoods = true) {
     const ingredientsHTML = this.createIngredientsHTML(details?.ingredients);
     const stepsHTML = this.createStepsHTML(details?.steps);
     const extraHTML = this.createExtraHTML(details?.extra);
     const username = details?.username ?? "Хэрэглэгч";
-    const similarHTML = this.createSimilarFoodsHTML(similarFoods);
+    const similarHTML = this.createSimilarFoodsHTML(similarFoods, hasSimilarFoods);
+    const sectionTitle = hasSimilarFoods && similarFoods.length > 0 ? "Ойролцоо хоолнууд" : "Санал болгох хоолнууд";
+    
+    const seeMoreLink = !hasSimilarFoods && similarFoods.length > 0 
+      ? '<a href="#" class="view-all-link">Бүгдийг үзэх &#8594;</a>'
+      : '';
 
     return `
       <main class="recipes">
@@ -192,7 +257,11 @@ export class RecipesInfo extends HTMLElement {
             ${this.createStepsSection(stepsHTML)}
           </aside>
         </section>
-            <foods-section title="Ойролцоо хоолнууд"></foods-section-title>
+        <section class="foods-section">
+          <section class="food-title">
+            <h2>${sectionTitle}</h2>
+            ${seeMoreLink}
+          </section>
           <section class="food-info">
             ${similarHTML}
           </section>
@@ -220,9 +289,7 @@ export class RecipesInfo extends HTMLElement {
   }
 
   async handleSaveButton() {
-    console.log('Save button clicked for recipe:', this.recipeId);
     const token = localStorage.getItem("token");
-    console.log('Token found:', token ? 'Yes' : 'No');
     
     if (!token) {
       alert("Жор хадгалахын тулд нэвтэрнэ үү");
@@ -231,20 +298,16 @@ export class RecipesInfo extends HTMLElement {
 
     try {
       const url = `${API_BASE_URL}/api/recipes/${this.recipeId}/save`;
-      console.log('Saving to:', url);
       
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
-      console.log('Save response status:', response.status);
       const result = await response.json();
-      console.log('Save response:', result);
 
       if (response.ok) {
         alert("Жор амжилттай хадгалагдлаа!");
-        console.log('Recipe saved successfully!');
       } else {
         if (response.status === 404) {
           alert("Энэ жор өгөгдлийн санд байхгүй байна. Зөвхөн өөрийн нэмсэн эсвэл бусад хэрэглэгчийн нэмсэн жоруудыг хадгалж болно.");
@@ -287,7 +350,6 @@ export class RecipesInfo extends HTMLElement {
 
       if (response.ok) {
         alert(`Таны үнэлгээ: ${rating} ⭐`);
-        // Reload the recipe to show updated rating
         await this.showRecipe(this.recipeId);
       } else {
         if (response.status === 404) {
@@ -305,6 +367,7 @@ export class RecipesInfo extends HTMLElement {
   attachButtonListeners() {
     const saveBtn = this.querySelector(".save");
     const rateBtn = this.querySelector(".rate");
+    const viewAllLink = this.querySelector(".view-all-link");
 
     if (saveBtn) {
       saveBtn.addEventListener("click", () => this.handleSaveButton());
@@ -312,6 +375,26 @@ export class RecipesInfo extends HTMLElement {
 
     if (rateBtn) {
       rateBtn.addEventListener("click", () => this.handleRateButton());
+    }
+
+    if (viewAllLink) {
+      viewAllLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        this.handleSeeMoreSuggested();
+      });
+    }
+  }
+
+  handleSeeMoreSuggested() {
+    const recipes = document.querySelector("#recipes");
+    const recipe = document.querySelector("#recipe");
+    
+    if (recipe) recipe.style.display = "none";
+    if (recipes) {
+      recipes.style.display = "block";
+      if (typeof recipes.loadFoods === 'function') {
+        recipes.loadFoods();
+      }
     }
   }
 
@@ -330,9 +413,31 @@ export class RecipesInfo extends HTMLElement {
 
       this.details = this.findRecipe(detailsData, id);
 
-      this.similarFoods = this.findSimilarFoods(infoData, this.recipe);
+      let similarFoods = infoData
+        .filter(f => f.type === this.recipe.type && f.id !== this.recipe.id)
+        .sort((a, b) => this.parseView(b.view) - this.parseView(a.view))
+        .slice(0, this.getCardLimitForScreenSize());
+      
+      let hasSimilarFoods = similarFoods.length > 0;
+      
+      if (similarFoods.length === 0) {
+        try {
+          similarFoods = await this.fetchSuggestedFoods(this.recipe.id);
+          hasSimilarFoods = false;
+        } catch (error) {
+          console.error('Error fetching suggested foods:', error);
+          const limit = this.getCardLimitForScreenSize();
+          similarFoods = infoData
+            .filter(f => f.id !== this.recipe.id)
+            .sort(() => Math.random() - 0.5)
+            .slice(0, limit);
+          hasSimilarFoods = false;
+        }
+      }
+      
+      this.similarFoods = similarFoods;
 
-      this.innerHTML = this.createRecipeHTML(this.recipe, this.details, this.similarFoods);
+      this.innerHTML = this.createRecipeHTML(this.recipe, this.details, this.similarFoods, hasSimilarFoods);
 
       this.attachButtonListeners();
 

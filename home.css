@@ -599,7 +599,6 @@ footer {
 }
 
 .main-recipes {
-    position: fixed;
     flex: 1;
     display: flex;
     margin-top: 11rem;
