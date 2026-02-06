@@ -185,10 +185,10 @@ export class RecipesInfo extends HTMLElement {
         <section class="recipe-information">
           <aside>
             ${this.createImageHTML(recipe)}
-            ${this.createIngredientsSection(ingredientsHTML)}
+            ${this.createRecipeDetailHTML(recipe, extraHTML, username)}
           </aside>
           <aside>
-            ${this.createRecipeDetailHTML(recipe, extraHTML, username)}
+            ${this.createIngredientsSection(ingredientsHTML)}
             ${this.createStepsSection(stepsHTML)}
           </aside>
         </section>
