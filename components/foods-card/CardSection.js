@@ -96,6 +96,11 @@ export class CardSection extends HTMLElement {
     if (elements.home) elements.home.style.display = 'none';
     if (elements.recipes) elements.recipes.style.display = 'none';
     if (elements.profileSection) elements.profileSection.style.display = 'none';
+    
+    const savedRecipesPage = document.querySelector('#saved-recipes-page');
+    const userRecipesPage = document.querySelector('#user-recipes-page');
+    if (savedRecipesPage) savedRecipesPage.style.display = 'none';
+    if (userRecipesPage) userRecipesPage.style.display = 'none';
   }
 
   showRecipe(recipeInfo) {
